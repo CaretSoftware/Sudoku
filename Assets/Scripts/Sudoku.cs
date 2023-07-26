@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Random = System.Random;
 
@@ -96,10 +97,10 @@ public class Sudoku {
         if (Unique(copy)) {
             blanks -= blanked;
             board = copy;
-        } else  
+        } else
             tries++;
 
-        if (blanks < desiredBlanks && tries < 1000)
+        if (blanks < desiredBlanks && tries < 100)
             return BlankCells(board, symmetry, desiredBlanks, random, blanks, tries);
 
         return board;
@@ -184,15 +185,6 @@ public class Sudoku {
         return false;
     }
 
-    public static (int row, int col) BoxRowColStart(int index) {
-        int row = RowFromIndex(index);
-        int col = ColFromIndex(index);
-        int boxRow = row - row % 3; // fix ´3´ if resizeable
-        int boxCol = col - col % 3; // fix ´3´ if resizeable
-        
-        return (row: boxRow, col: boxCol);
-    }
-
     public static void SetNumber(int index, int number) {
         int row = index / _size;
         int col = index % _size;
@@ -204,6 +196,12 @@ public class Sudoku {
     public static int ColFromIndex(int index) => index % _size;
     
     public static int NumberAt(int index) => Board[index / _size, index % _size];
+
+    public static int RowStartIndex(int index) => index / _size * _size;
+
+    public static int ColStartIndex(int index) => index % _size;
+
+    public static int BoxStartIndex(int index) => index / 9 / 3 * 27 + index % 9 / 3 * 3;
 
     public static bool ValidAtIndex(int index, int num) =>
         Valid(Board, num, index / _size, index % _size);
