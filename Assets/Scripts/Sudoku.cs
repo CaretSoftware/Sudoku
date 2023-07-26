@@ -191,20 +191,24 @@ public class Sudoku {
         Board[row, col] = number;
     }
 
-    public static int RowFromIndex(int index) => index / _size;
+    private static int RowFromIndex(int index) => index / _size;
     
-    public static int ColFromIndex(int index) => index % _size;
+    private static int ColFromIndex(int index) => index % _size;
     
-    public static int NumberAt(int index) => Board[index / _size, index % _size];
+    private static int Row(int index) => index / _size;
+    
+    private static int Col(int index) => index % _size;
+    
+    public static int NumberAt(int index) => Board[Row(index), Col(index)];
 
-    public static int RowStartIndex(int index) => index / _size * _size;
+    public static int RowStartIndex(int index) => Row(index) * _size;
 
-    public static int ColStartIndex(int index) => index % _size;
+    public static int ColStartIndex(int index) => Col(index);
 
-    public static int BoxStartIndex(int index) => index / 9 / 3 * 27 + index % 9 / 3 * 3;
+    public static int BoxStartIndex(int index) => Row(index) / 3 * _size * 3 + Col(index) / 3 * 3;
 
     public static bool ValidAtIndex(int index, int num) =>
-        Valid(Board, num, index / _size, index % _size);
+        Valid(Board, num, Row(index), Col(index));
 
     //public static void PrintBoard(int[,] board) => 
     //    Debug.Log(String(board));
