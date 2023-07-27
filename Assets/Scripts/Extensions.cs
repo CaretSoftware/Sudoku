@@ -12,6 +12,12 @@ public static class Extensions {
             (list[k], list[n]) = (list[n], list[k]);
         }  
     }
+
+    public static T RandomEnumValue<T>(this Enum e, Random random = null) where T : Enum {
+        random ??= new Random();
+        Array array = Enum.GetValues(typeof(T));
+        return (T)array.GetValue(random.Next(array.Length));
+    }
     
     public static int[,] Copy(this int[,] original) {
         if (original == null) return null;
@@ -24,11 +30,5 @@ public static class Extensions {
         }
 
         return copy;
-    }
-
-    public static Symmetry RandomEnumValue(this Symmetry enumerator, Random random = null) {
-        random ??= new Random();
-        Array array = Enum.GetValues(typeof(Symmetry));
-        return (Symmetry)array.GetValue(random.Next(array.Length));
     }
 }

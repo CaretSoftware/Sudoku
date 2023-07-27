@@ -18,7 +18,7 @@ public class CellManager : MonoBehaviour {
     private void Start() => FillCell();
 
     private void FillCell() {
-        int number = Sudoku.NumberAt(_index);
+        int number = Sudoku.Number(_index);
 
         if (number == 0)
             SpawnTiles();
@@ -28,7 +28,7 @@ public class CellManager : MonoBehaviour {
 
     private void SpawnTiles() {
         for (int i = 1; i <= Size; i++) {
-            if (Sudoku.ValidAtIndex(_index, i)) {
+            if (Sudoku.Valid(_index, i)) {
                 NumberTile numberTile = 
                     Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
                 numberTile.cellManager = this;

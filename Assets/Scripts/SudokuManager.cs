@@ -4,16 +4,14 @@ using UnityEngine;
 public class SudokuManager : MonoBehaviour {
     private static int _size = 9;
     private static List<CellManager> _cellManagers = new List<CellManager>();
-    private Sudoku _sudoku;
     
     [SerializeField] private GameObject cellPrefab;
 
     private void Awake() => CreateNewPuzzle(_size);
 
-    private void CreateNewPuzzle(int size) {
-        _sudoku = new Sudoku(size);
+    private void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
         DestroyOldPuzzle();
-        Sudoku.NewPuzzle(seed: 0, Difficulty.Easy);
+        Sudoku.NewPuzzle(seed, _size, difficulty);
         InstantiateCells(_size);
     }
 
