@@ -9,7 +9,7 @@ public class Sudoku {
     private const int Blank = 0;
     private static int _size = 9;
     private static Symmetry _symmetry = Symmetry.Vertical;
-    private static int[] Board { get; set; } = {
+    public static int[] Board { get; private set; } = {
         7, 0, 2, 0, 5, 0, 6, 0, 0,
         0, 0, 0, 0, 0, 3, 0, 0, 0,
         1, 0, 0, 0, 0, 9, 5, 0, 0,
@@ -134,7 +134,7 @@ public class Sudoku {
         numSolvedBoards++;                              // Update number of solved boards.
     }
     
-    private static int[] Solve(int[] board) {
+    public static int[] Solve(int[] board) {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
             if (board[index] == Blank) {
