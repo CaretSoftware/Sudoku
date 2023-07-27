@@ -9,20 +9,20 @@ public class SudokuManager : MonoBehaviour {
 
     private void Awake() => CreateNewPuzzle(_size);
 
-    private void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
+    public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
         DestroyOldPuzzle();
-        Sudoku.NewPuzzle(seed, _size, difficulty);
-        InstantiateCells(_size);
+        Sudoku.NewPuzzle(seed, size, difficulty);
+        InstantiateCells(size);
     }
-
+    
     private void DestroyOldPuzzle() {
         for (int i = 0; i < _cellManagers.Count; i++) 
             Destroy(_cellManagers[i].gameObject);
         _cellManagers.Clear();
     }
-
+    
     private void InstantiateCells(int size) {
-        CellManager.Size = size;
+        CellManager.ResetCells(size);
         for (int index = 0; index < size * size; index++)
             _cellManagers.Add(Instantiate(cellPrefab, this.transform).GetComponent<CellManager>());
     }
@@ -41,6 +41,15 @@ public class SudokuManager : MonoBehaviour {
         for (int r = 0; r < 3; r++)
             for (int c = 0; c < 3; c++)
                 _cellManagers[boxStart + r * _size + c].RemoveTiles(nums);
+    }
+
+    public void Solve() {
+        Sudoku.Solve(Sudoku.Board);
+        for (int index = 0; index < Sudoku.Board.Length; index++) {
+            RemoveInvalidTiles(index, Sudoku.Board[index]);
+            _cellManagers[index].SetNumber(Sudoku.Board[index]);
+            SetNumber(index, number: Sudoku.Board[index]);
+        }
     }
 
     public static void SetNumber(int index, int number, bool removeInvalidNumbers = true) {

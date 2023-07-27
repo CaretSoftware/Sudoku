@@ -1,10 +1,14 @@
 using System;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
 
 public class CellManager : MonoBehaviour {
-    public static int Size { get; set; }
-    private readonly NumberTile[] _numberTiles = new NumberTile[Size];
+    public delegate void ShowValid();
+    public static ShowValid ShowValidDelegate;
+
+    private static int _size;
+    private readonly NumberTile[] _numberTiles = new NumberTile[_size];
     private static int _staticIndex;
     private int _index;
 
@@ -13,7 +17,16 @@ public class CellManager : MonoBehaviour {
     [SerializeField] private GameObject blankTilePrefab;
     [SerializeField] private Transform numberTileParent;
 
-    private void Awake() => _index = _staticIndex++;
+    private void Awake() {
+        _index = _staticIndex++;
+        ShowValidDelegate += ShowValidNumbers;
+    }
+
+    private void OnDestroy() => ShowValidDelegate -= ShowValidNumbers;
+
+    private void ShowValidNumbers() {
+        
+    }
 
     private void Start() => FillCell();
 
@@ -27,11 +40,11 @@ public class CellManager : MonoBehaviour {
     }
 
     private void SpawnTiles() {
-        for (int i = 1; i <= Size; i++) {
+        for (int i = 1; i <= _size; i++) {
             if (Sudoku.Valid(_index, i)) {
                 NumberTile numberTile = 
                     Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
-                numberTile.cellManager = this;
+                numberTile.MyCellManager = this;
                 numberTile.Number = i;
                 _numberTiles[i - 1] = numberTile;
             } else {
@@ -42,10 +55,13 @@ public class CellManager : MonoBehaviour {
     }
 
     public void ClickedTile(int number) {
-        text.text = number.ToString();
+        SetNumber(number);
         SudokuManager.SetNumber(_index, number);
         DestroyAllTiles();
     }
+
+    public void SetNumber(int number) =>
+        text.text = number.ToString();
 
     public void RemoveTiles(params int[] numbers) {
         for (int i = 0; i < numbers.Length; i++)
@@ -53,15 +69,19 @@ public class CellManager : MonoBehaviour {
     }
 
     private void DestroyAllTiles() {
-        for (int number = 1; number <= Size; number++)
+        for (int number = 1; number <= _size; number++)
             DestroyTile(number);
     }
     
     private void DestroyTile(int number) {
         NumberTile tile = _numberTiles[number - 1];
         if (tile != null)
-            Destroy(tile);
+            tile.Clear(true);
+            //Destroy(tile);
     }
 
-    private void OnDestroy() => _staticIndex = 0;
+    public static void ResetCells(int size) {
+        _staticIndex = 0;
+        _size = size;
+    }
 }
