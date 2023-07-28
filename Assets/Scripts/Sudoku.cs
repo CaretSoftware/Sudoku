@@ -6,7 +6,7 @@ using Random = System.Random;
 public enum Difficulty {  Impossible = 64, Improbable = 60, VeryHard = 55, Hard = 50, Medium = 45, Easy = 40 }
 
 public class Sudoku {
-    private const int Blank = 0;
+    public const int Blank = 0;
     private static int _size = 9;
     private static Symmetry _symmetry = Symmetry.Vertical;
     public static int[] Board { get; private set; } = {

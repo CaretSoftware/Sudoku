@@ -33,14 +33,14 @@ public class SudokuManager : MonoBehaviour {
         int boxStart = Sudoku.BoxStartIndex(index);
 
         for (int row = rowStart, rowEnd = rowStart + _size; row < rowEnd; row++)
-            _cellManagers[row].RemoveTiles(nums);
+            _cellManagers[row].ClearTiles(numbers: nums, valid: false);
         
         for (int col = colStart, colEnd = _size * _size + colStart; col < colEnd; col += _size)
-            _cellManagers[col].RemoveTiles(nums);
+            _cellManagers[col].ClearTiles(numbers: nums, valid: false);
         
         for (int r = 0; r < 3; r++)
             for (int c = 0; c < 3; c++)
-                _cellManagers[boxStart + r * _size + c].RemoveTiles(nums);
+                _cellManagers[boxStart + r * _size + c].ClearTiles(numbers: nums, valid: false);
     }
 
     public void Solve() {
