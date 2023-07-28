@@ -74,6 +74,8 @@ public class CellManager : MonoBehaviour {
     }
     
     private void ClearTile(int number, bool valid = true, bool assigned = false) {
+        if (number - 1 < 0 || number - 1 >= _numberTiles.Length)
+            Debug.Log($"num: {number}");
         NumberTile tile = _numberTiles[number - 1];
         if (tile != null && !tile.Cleared)
             tile.Clear(clear: true, valid, assigned);

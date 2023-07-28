@@ -18,16 +18,16 @@ namespace Command {
 
         public override void Execute() {
             _cellmanager.SetNumber(_values.to);
-            Sudoku.SetNumber(_addToTileChangesList _values.to, _cellmanager.Index);
-            for (int tile = 0; tile < _tileChanges.Count; tile++)
-                _tileChanges[tile].Execute();
+            Sudoku.SetNumber(_cellmanager.Index, _values.to);
+            //for (int tile = 0; tile < _tileChanges.Count; tile++)
+            //    _tileChanges[tile].Execute();
         }
 
         public override void Undo() {
             _cellmanager.SetNumber(_values.from);
-            Sudoku.SetNumber(_values.from, _cellmanager.Index);
-            for (int tile = 0; tile < _tileChanges.Count; tile++)
-                _tileChanges[tile].Undo();
+            Sudoku.SetNumber(_cellmanager.Index, _values.from);
+            //for (int tile = 0; tile < _tileChanges.Count; tile++)
+            //    _tileChanges[tile].Undo();
         }
 
         private void AddToTileList(TileChange tileChange) => _tileChanges.Add(tileChange);

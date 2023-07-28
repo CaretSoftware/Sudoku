@@ -57,24 +57,17 @@ public class InputManager : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Backspace) ||
             ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) 
              && Input.GetKeyDown(KeyCode.Z))) {
-            Debug.Log("pressed undo");
             Command.Processor.Undo();
         }
 
         if (Input.GetKeyDown(KeyCode.N)) {
-            Debug.Log("pressed redo");
             Command.Processor.Redo();
         }
     }
 
-    public void Solve() {
-        _sudokuManager.Solve();
-        Debug.Log($"solve");
-    }
+    public void Solve() => _sudokuManager.Solve();
 
-    public void Undo() { 
-        Command.Processor.Undo();
-    }
+    public void Undo() => Command.Processor.Undo();
 
     public void Size() {
         Debug.Log($"size: {sizeDropDown.value}");
