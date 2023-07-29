@@ -10,7 +10,7 @@ public class NumberTile : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private Image background;
     [SerializeField] private Color interactableColor;
-    
+    [SerializeField] private RectTransform textRectTransform;
     public int Number {
         get => _number;
         set {
@@ -20,7 +20,7 @@ public class NumberTile : MonoBehaviour {
         }
     }
     
-    public CellManager MyCellManager { get; set; }
+    public TileManager MyTileManager { get; set; }
     public bool Cleared {
         get => _cleared;
         set {
@@ -44,6 +44,8 @@ public class NumberTile : MonoBehaviour {
 
     private void Awake() => HideInvalidTile += Hide;
 
+    public void SetSize(Vector2 size) => textRectTransform.sizeDelta = size;
+
     private void OnDestroy() => HideInvalidTile -= Hide;
 
     public void Clear(Command.FillNumber.AddTileChange addTileChange) {
@@ -54,7 +56,7 @@ public class NumberTile : MonoBehaviour {
     public void Click() {
         if (Blank())
             return;
-        MyCellManager.ClickedTile(Number);
+        MyTileManager.ClickedTile(Number);
     }
 
     private void Hide(bool shouldHide) {

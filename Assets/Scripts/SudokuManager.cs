@@ -1,16 +1,19 @@
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SudokuManager : MonoBehaviour {
     private static int _size = 9;
-    private static List<CellManager> _cellManagers = new List<CellManager>();
+    private static List<TileManager> _tileManagers = new List<TileManager>();
     [SerializeField] private GameObject cellPrefab;
-
-    private void Awake() => CreateNewPuzzle(_size);
+    [SerializeField] private RectTransform sudokuRectTransform;
+    [SerializeField] private GridLayoutGroup gridLayout;
+    [SerializeField] private float sudokuPanelDimension = 628.1552f;
     
+    private void Awake() => CreateNewPuzzle(_size);
 
     public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
+        _size = size;
         DestroyOldPuzzle();
         Sudoku.NewPuzzle(seed, size, difficulty);
         InstantiateCells(size);
@@ -18,15 +21,21 @@ public class SudokuManager : MonoBehaviour {
     
     private void DestroyOldPuzzle() {
         Command.Processor.ClearUndo();
-        for (int i = 0; i < _cellManagers.Count; i++) 
-            Destroy(_cellManagers[i].gameObject);
-        _cellManagers.Clear();
+        for (int i = 0; i < _tileManagers.Count; i++) 
+            Destroy(_tileManagers[i].gameObject);
+        _tileManagers.Clear();
     }
     
     private void InstantiateCells(int size) {
-        CellManager.ResetCells(size);
-        for (int index = 0; index < size * size; index++)
-            _cellManagers.Add(Instantiate(cellPrefab, this.transform).GetComponent<CellManager>());
+        TileManager.ResetCells(size);
+        Vector2 cellSize = new Vector2( sudokuPanelDimension / size, sudokuPanelDimension / size);
+        gridLayout.cellSize = cellSize;
+
+        for (int index = 0; index < size * size; index++) {
+            TileManager tileManager = Instantiate(cellPrefab, this.transform).GetComponent<TileManager>();
+            _tileManagers.Add(tileManager);
+            tileManager.SetSize(cellSize);
+        }
     }
 
     private static void FindInvalidTiles(int index, 
@@ -36,14 +45,14 @@ public class SudokuManager : MonoBehaviour {
         int boxStart = Sudoku.BoxStartIndex(index);
 
         for (int row = rowStart, rowEnd = rowStart + _size; row < rowEnd; row++)
-            _cellManagers[row].ClearTiles(addTileChange, numbers: nums);
+            _tileManagers[row].ClearTiles(addTileChange, numbers: nums);
         
         for (int col = colStart, colEnd = _size * _size + colStart; col < colEnd; col += _size)
-            _cellManagers[col].ClearTiles(addTileChange, numbers: nums);
+            _tileManagers[col].ClearTiles(addTileChange, numbers: nums);
         
         for (int r = 0; r < 3; r++)
             for (int c = 0; c < 3; c++)
-                _cellManagers[boxStart + r * _size + c].ClearTiles(addTileChange, numbers: nums);
+                _tileManagers[boxStart + r * _size + c].ClearTiles(addTileChange, numbers: nums);
     }
 
     public void Solve() {
@@ -54,7 +63,7 @@ public class SudokuManager : MonoBehaviour {
         }
         for (int index = 0; index < Sudoku.Board.Length; index++) {
             FindInvalidTiles(index, null, Sudoku.Board[index]);
-            _cellManagers[index].SetNumber(Sudoku.Board[index]);
+            _tileManagers[index].SetNumber(Sudoku.Board[index]);
             SetNumber(index, number: Sudoku.Board[index]);
         }
         Command.Processor.ClearUndo();
@@ -62,7 +71,7 @@ public class SudokuManager : MonoBehaviour {
 
     public static void SetNumber(int index, int number) {
         Sudoku.SetNumber(index, number);
-        _cellManagers[index].SetNumber(number);
+        _tileManagers[index].SetNumber(number);
     }
 
     public static void FillNumber(int index, int number) {
