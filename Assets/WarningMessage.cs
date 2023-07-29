@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class WarningMessage : MonoBehaviour {
     public delegate void WarningMessageDelegate(string message);
@@ -25,18 +23,14 @@ public class WarningMessage : MonoBehaviour {
     }
     private WindowState _windowState = WindowState.Closed;
     private Coroutine _popupCoroutine;
-    private string _message;
     
     private void Awake() => warningMessage += Warning;
 
     private void OnDestroy() => warningMessage -= Warning;
-
-    [ContextMenu("WARNING")]
-    private void Warn() => Warning("TEST");
+    
     private void Warning(string message) {
-        _message = message;
+        warningText.text = message;
         Window(openWindow: true);
-        //StartCoroutine(ShowWarning(message));
     }
 
     public void Close() {
@@ -63,7 +57,7 @@ public class WarningMessage : MonoBehaviour {
         }
     }
 
-    public IEnumerator CloseDelay(float secondsUntilClose) {
+    private IEnumerator CloseDelay(float secondsUntilClose) {
         float t = 0f;
         do {
             t += Time.deltaTime;
@@ -75,7 +69,7 @@ public class WarningMessage : MonoBehaviour {
         Window(openWindow: false);
     }
 
-    public IEnumerator MessagePopup() {
+    private IEnumerator MessagePopup() {
         _windowState = WindowState.Opening;
         float t = 0f;
         
@@ -96,7 +90,7 @@ public class WarningMessage : MonoBehaviour {
         _windowState = WindowState.Open;
     }
     
-    public IEnumerator ClosePopup() {
+    private IEnumerator ClosePopup() {
         _windowState = WindowState.Closing;
         float t = 0f;
         Vector3 currentScale = messageBoxRectTransform.localScale;

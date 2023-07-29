@@ -7,7 +7,16 @@ public enum Difficulty {  Hard = 64, Medium = 45, Easy = 40 }
 
 public class Sudoku {
     public const int Blank = 0;
-    private static int _size = 9;
+    private static int _size {
+        get => _sizeBackingField;
+        set {
+            _sizeBackingField = value;
+            _blockWidth = Mathf.RoundToInt(Mathf.Sqrt(value));
+            Debug.Log($"blockWidth {_blockWidth}");
+        }
+    }
+    private static int _sizeBackingField = 9;
+    private static int _blockWidth = 3;
     private static Symmetry _symmetry = Symmetry.Vertical;
     public static int[] Board { get; private set; } = {
         7, 0, 2, 0, 5, 0, 6, 0, 0,
@@ -25,7 +34,7 @@ public class Sudoku {
         _size = size;
         Random random = seed == 0 ? new Random() : new Random(seed);
         Board = NewBoard(new int[size * size], size, random);
-        Board = SetDifficulty(Board, size, difficulty, random);
+        //Board = SetDifficulty(Board, size, difficulty, random);
     }
     
     private static int[] NewBoard(int[] board, int size, Random random) {
@@ -47,13 +56,23 @@ public class Sudoku {
 
         for (int col = 0; col < size - 1; col++)
             board[col + 1] = colOrder[col];
-
+        debug = 0;
         int[] filledBoard = Solve(board);
-        
-        if (filledBoard == null) // duplicate values in first block, recursively try new board
-            return NewBoard(new int[size * size], size, random);
+        PrintBoard(filledBoard);
+        //if (filledBoard == null) // duplicate values in first block, recursively try new board
+        //    return NewBoard(new int[size * size], size, random);
         
         return board;
+    }
+
+    private static void PrintBoard(int[] board) {
+        string s = String.Format("==={0, -3}x{0, 3}===\n", _size);
+        for (int i = 0; i < board.Length; i++) {
+            if ((i) % _size == 0)
+                s += "\n";
+            s += $"{board[i]} ";
+        }
+        Debug.Log(s);
     }
 
     private static int[] SetDifficulty(int[] board, int size, Difficulty difficulty, Random random) {
@@ -141,13 +160,19 @@ public class Sudoku {
         Board = board;
         return true;
     }
-    
+
+    private static int debug;
     private static int[] Solve(int[] board) {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
             if (board[index] == Blank) {
                 for (int num = 1; num <= _size; num++) {
                     if (Valid(board, num, index)) {
+                        debug++;
+                        if (debug > 100000) {
+                            WarningMessage.warningMessage?.Invoke("10.000 ITERATIONS\nNO SUDOKU");
+                            return null;
+                        }
                         board[index] = num;             // Try num.
                         if (Solve(board) != null) {     // Recursive call.
                             Board = board;
@@ -190,8 +215,8 @@ public class Sudoku {
 
     private static bool NumberInBox(int[] board, int num, int index) {
         int boxStart = BoxStartIndex(index);
-        for (int r = 0; r < 3; r++)
-            for (int c = 0; c < 3; c++)
+        for (int r = 0; r < _blockWidth; r++)
+            for (int c = 0; c < _blockWidth; c++)
                 if (board[boxStart + r * _size + c] == num)
                     return true;
         
@@ -206,7 +231,8 @@ public class Sudoku {
     
     public static int ColStartIndex(int index) => Col(index);
 
-    public static int BoxStartIndex(int index) => Row(index) / 3 * _size * 3 + Col(index) / 3 * 3;
+    public static int BoxStartIndex(int index) => 
+        Row(index) / _blockWidth * _size * _blockWidth + Col(index) / _blockWidth * _blockWidth;
 
     public static bool Valid(int index, int num) => Valid(Board, num, index);
 

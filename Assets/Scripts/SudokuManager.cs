@@ -7,13 +7,16 @@ public class SudokuManager : MonoBehaviour {
     private static List<CellManager> _cellManagers = new List<CellManager>();
     [SerializeField] private GameObject cellPrefab;
 
-    private void Awake() => CreateNewPuzzle(_size);
-    
+    //private void Awake() => CreateNewPuzzle(_size);
 
     public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
+        _size = size;
         DestroyOldPuzzle();
+        Debug.Log($"DestroyOldPuzzle");
         Sudoku.NewPuzzle(seed, size, difficulty);
+        Debug.Log($"NewPuzzle");
         InstantiateCells(size);
+        Debug.Log($"InstantiateCells {size}");
     }
     
     private void DestroyOldPuzzle() {

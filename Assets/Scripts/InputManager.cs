@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 
 public class InputManager : MonoBehaviour {
     [SerializeField] private TMP_Dropdown sudokuDropDown;
@@ -12,7 +10,7 @@ public class InputManager : MonoBehaviour {
     [SerializeField] private TMP_InputField seedInputField;
     [SerializeField] private Button undoButton;
     [SerializeField] private Toggle hideInvalidNumbersToggle;
-    [FormerlySerializedAs("darkModeText")] [SerializeField] private TextMeshProUGUI darkModeButtonText;
+    [SerializeField] private TextMeshProUGUI darkModeButtonText;
     [SerializeField] private Volume postProcessVolume;
     [SerializeField] private VolumeProfile darkGlobalVolumeProfile;
     [SerializeField] private VolumeProfile lightGlobalVolumeProfile;
@@ -21,12 +19,13 @@ public class InputManager : MonoBehaviour {
     [SerializeField] private Color darkModeButtonDisableColor;
     private Color lightModeButtonDisableColor;
     private SudokuManager _sudokuManager;
+    private Difficulty _difficulty;
     private int _seed;
     private int _size = 9;
-    private Difficulty _difficulty;
-    private bool _darkMode;
     private float _undoInterval;
     private float _redoInterval;
+    private float _rampUp;
+    private bool _darkMode;
 
     private void Awake() {
         Command.Processor.undoEmptyDelegate += UndoButton;
@@ -37,6 +36,7 @@ public class InputManager : MonoBehaviour {
     private void OnDestroy() => Command.Processor.undoEmptyDelegate -= UndoButton;
 
     public void NewSudoku() {
+        Debug.Log($"size NewSudoku {_size}");
         switch (sudokuDropDown.value) {
             case 0:
                 _difficulty = Difficulty.Easy;
@@ -51,24 +51,23 @@ public class InputManager : MonoBehaviour {
         _sudokuManager.CreateNewPuzzle(_size, _difficulty, _seed);
     }
 
-    private float doRampUp;
     private void Update() {
         if (Input.GetKey(KeyCode.Z) && Time.time > _undoInterval) {
             _undoInterval = Time.time + Mathf.Lerp(
                 repeatInputIntervalInitial,
-                repeatInputInterval, doRampUp += .2f);
+                repeatInputInterval, _rampUp += .2f);
             Command.Processor.Undo();
         }
 
         if (Input.GetKey(KeyCode.Y) && Time.time > _redoInterval) {
             _redoInterval = Time.time + Mathf.Lerp(
                 repeatInputIntervalInitial,
-                repeatInputInterval, doRampUp += .2f);
+                repeatInputInterval, _rampUp += .2f);
             Command.Processor.Redo();
         }
         
-        if (Input.GetKeyUp(KeyCode.Z)) _undoInterval = doRampUp = 0f;
-        if (Input.GetKeyUp(KeyCode.Y)) _redoInterval = doRampUp = 0f;
+        if (Input.GetKeyUp(KeyCode.Z)) _undoInterval = _rampUp = 0f;
+        if (Input.GetKeyUp(KeyCode.Y)) _redoInterval = _rampUp = 0f;
     }
 
     public void Solve() => _sudokuManager.Solve();
@@ -81,9 +80,10 @@ public class InputManager : MonoBehaviour {
                 _size = 9;
                 break;
             case 1:
-                _size = 15;
+                _size = 16;
                 break;
         }
+        Debug.Log($"Size() {sizeDropDown.value} {_size}");
     }
  
     public void Seed() {
