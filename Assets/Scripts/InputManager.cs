@@ -36,7 +36,6 @@ public class InputManager : MonoBehaviour {
     private void OnDestroy() => Command.Processor.undoEmptyDelegate -= UndoButton;
 
     public void NewSudoku() {
-        Debug.Log($"size NewSudoku {_size}");
         switch (sudokuDropDown.value) {
             case 0:
                 _difficulty = Difficulty.Easy;

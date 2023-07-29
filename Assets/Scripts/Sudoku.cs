@@ -125,7 +125,6 @@ public class Sudoku {
     }
 
     private static bool Unique(int[] board) {
-        return true;
         int numSolvedBoards = 0;
         Unique((int[])board.Clone(), ref numSolvedBoards);
         

@@ -9,6 +9,8 @@ public class TileManager : MonoBehaviour {
     [SerializeField] private GridLayoutGroup gridLayout;
     [SerializeField] private float sudokuPanelDimension = 628.1552f;
     [SerializeField] private RectTransform textRectTransform;
+    [SerializeField] private Outline outline;
+    [SerializeField] private float defaultOutlineDistance = 5f;
 
     private static int _size;
     private static int _staticIndex;
@@ -30,7 +32,9 @@ public class TileManager : MonoBehaviour {
         float numberTileDimension = sudokuPanelDimension / _size / Mathf.Sqrt(_size);
         Vector2 numberTileSize = new Vector2(numberTileDimension, numberTileDimension);
         gridLayout.cellSize = numberTileSize;
-
+        float outlineWidth = defaultOutlineDistance * (9f / _size);
+        outline.effectDistance = new Vector2(outlineWidth, outlineWidth);
+        
         for (int i = 1; i <= _size; i++) {
             NumberTile numberTile = 
                 Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
