@@ -12,7 +12,6 @@ public class Sudoku {
         set {
             _sizeBackingField = value;
             _blockWidth = Mathf.RoundToInt(Mathf.Sqrt(value));
-            Debug.Log($"blockWidth {_blockWidth}");
         }
     }
     private static int _sizeBackingField = 9;
@@ -34,7 +33,7 @@ public class Sudoku {
         _size = size;
         Random random = seed == 0 ? new Random() : new Random(seed);
         Board = NewBoard(new int[size * size], size, random);
-        //Board = SetDifficulty(Board, size, difficulty, random);
+        Board = SetDifficulty(Board, size, difficulty, random);
     }
     
     private static int[] NewBoard(int[] board, int size, Random random) {
@@ -58,9 +57,8 @@ public class Sudoku {
             board[col + 1] = colOrder[col];
         debug = 0;
         int[] filledBoard = Solve(board);
-        PrintBoard(filledBoard);
-        //if (filledBoard == null) // duplicate values in first block, recursively try new board
-        //    return NewBoard(new int[size * size], size, random);
+        if (filledBoard == null) // duplicate values in first block, recursively try new board
+            return NewBoard(new int[size * size], size, random);
         
         return board;
     }
@@ -68,7 +66,7 @@ public class Sudoku {
     private static void PrintBoard(int[] board) {
         string s = String.Format("==={0, -3}x{0, 3}===\n", _size);
         for (int i = 0; i < board.Length; i++) {
-            if ((i) % _size == 0)
+            if (i % _size == 0)
                 s += "\n";
             s += $"{board[i]} ";
         }
@@ -127,6 +125,7 @@ public class Sudoku {
     }
 
     private static bool Unique(int[] board) {
+        return true;
         int numSolvedBoards = 0;
         Unique((int[])board.Clone(), ref numSolvedBoards);
         
@@ -162,6 +161,7 @@ public class Sudoku {
     }
 
     private static int debug;
+    
     private static int[] Solve(int[] board) {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
@@ -169,8 +169,8 @@ public class Sudoku {
                 for (int num = 1; num <= _size; num++) {
                     if (Valid(board, num, index)) {
                         debug++;
-                        if (debug > 100000) {
-                            WarningMessage.warningMessage?.Invoke("10.000 ITERATIONS\nNO SUDOKU");
+                        if (debug > 10000000) {
+                            WarningMessage.warningMessage?.Invoke("1.000.000 ITERATIONS\nNO SUDOKU");
                             return null;
                         }
                         board[index] = num;             // Try num.

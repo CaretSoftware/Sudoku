@@ -83,7 +83,6 @@ public class InputManager : MonoBehaviour {
                 _size = 16;
                 break;
         }
-        Debug.Log($"Size() {sizeDropDown.value} {_size}");
     }
  
     public void Seed() {

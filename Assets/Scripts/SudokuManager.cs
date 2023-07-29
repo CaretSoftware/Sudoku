@@ -1,22 +1,22 @@
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SudokuManager : MonoBehaviour {
     private static int _size = 9;
     private static List<CellManager> _cellManagers = new List<CellManager>();
     [SerializeField] private GameObject cellPrefab;
-
-    //private void Awake() => CreateNewPuzzle(_size);
+    [SerializeField] private RectTransform sudokuRectTransform;
+    [SerializeField] private GridLayoutGroup gridLayout;
+    [SerializeField] private float sudokuPanelDimension = 628.1552f;
+    
+    private void Awake() => CreateNewPuzzle(_size);
 
     public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
         _size = size;
         DestroyOldPuzzle();
-        Debug.Log($"DestroyOldPuzzle");
         Sudoku.NewPuzzle(seed, size, difficulty);
-        Debug.Log($"NewPuzzle");
         InstantiateCells(size);
-        Debug.Log($"InstantiateCells {size}");
     }
     
     private void DestroyOldPuzzle() {
@@ -28,6 +28,9 @@ public class SudokuManager : MonoBehaviour {
     
     private void InstantiateCells(int size) {
         CellManager.ResetCells(size);
+        Vector2 cellSize = new Vector2( sudokuPanelDimension / size, sudokuPanelDimension / size);
+        gridLayout.cellSize = cellSize;
+        
         for (int index = 0; index < size * size; index++)
             _cellManagers.Add(Instantiate(cellPrefab, this.transform).GetComponent<CellManager>());
     }

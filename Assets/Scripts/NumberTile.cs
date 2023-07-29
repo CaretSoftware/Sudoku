@@ -10,7 +10,7 @@ public class NumberTile : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private Image background;
     [SerializeField] private Color interactableColor;
-    
+    [SerializeField] private RectTransform textRectTransform;
     public int Number {
         get => _number;
         set {
@@ -43,6 +43,8 @@ public class NumberTile : MonoBehaviour {
     private int _number;
 
     private void Awake() => HideInvalidTile += Hide;
+
+    public void SetSize(Vector2 size) => textRectTransform.sizeDelta = size;
 
     private void OnDestroy() => HideInvalidTile -= Hide;
 

@@ -40,7 +40,7 @@ namespace Command {
         public static void ClearUndo() {
             _commands = new List<Command>();
             _currentCommandIndex = -1;
-            undoEmptyDelegate.Invoke(empty: true);
+            undoEmptyDelegate?.Invoke(empty: true);
         }
     }
 }
