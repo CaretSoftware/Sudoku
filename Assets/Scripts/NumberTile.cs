@@ -20,7 +20,7 @@ public class NumberTile : MonoBehaviour {
         }
     }
     
-    public CellManager MyCellManager { get; set; }
+    public TileManager MyTileManager { get; set; }
     public bool Cleared {
         get => _cleared;
         set {
@@ -56,7 +56,7 @@ public class NumberTile : MonoBehaviour {
     public void Click() {
         if (Blank())
             return;
-        MyCellManager.ClickedTile(Number);
+        MyTileManager.ClickedTile(Number);
     }
 
     private void Hide(bool shouldHide) {

@@ -2,12 +2,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class CellManager : MonoBehaviour {
+public class TileManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private GameObject numberTilePrefab;
     [SerializeField] private Transform numberTileParent;
     [SerializeField] private GridLayoutGroup gridLayout;
     [SerializeField] private float sudokuPanelDimension = 628.1552f;
+    [SerializeField] private RectTransform textRectTransform;
 
     private static int _size;
     private static int _staticIndex;
@@ -26,7 +27,6 @@ public class CellManager : MonoBehaviour {
     }
 
     private void SpawnTiles(bool cleared) {
-        
         float numberTileDimension = sudokuPanelDimension / _size / Mathf.Sqrt(_size);
         Vector2 numberTileSize = new Vector2(numberTileDimension, numberTileDimension);
         gridLayout.cellSize = numberTileSize;
@@ -34,7 +34,7 @@ public class CellManager : MonoBehaviour {
         for (int i = 1; i <= _size; i++) {
             NumberTile numberTile = 
                 Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
-            numberTile.MyCellManager = this;
+            numberTile.MyTileManager = this;
             numberTile.Number = i;
             numberTile.Valid = Sudoku.Valid(_index, i);
             numberTile.Cleared = cleared;
@@ -73,6 +73,8 @@ public class CellManager : MonoBehaviour {
         NumberTile tile = _numberTiles[number - 1];
         tile.Clear(addTileChange);
     }
+    
+    public void SetSize(Vector2 size) => textRectTransform.sizeDelta = size;
 
     public static void ResetCells(int size) {
         _staticIndex = 0;
