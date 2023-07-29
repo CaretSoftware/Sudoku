@@ -39,13 +39,13 @@ public class InputManager : MonoBehaviour {
     public void NewSudoku() {
         switch (sudokuDropDown.value) {
             case 0:
-                _difficulty = Difficulty.Hard;
+                _difficulty = Difficulty.Easy;
                 break;
             case 1:
                 _difficulty = Difficulty.Medium;
                 break;
             case 2:
-                _difficulty = Difficulty.Easy;
+                _difficulty = Difficulty.Hard;
                 break;
         }
         _sudokuManager.CreateNewPuzzle(_size, _difficulty, _seed);
