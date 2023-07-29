@@ -16,7 +16,8 @@ public class InputManager : MonoBehaviour {
     [SerializeField] private Volume postProcessVolume;
     [SerializeField] private VolumeProfile darkGlobalVolumeProfile;
     [SerializeField] private VolumeProfile lightGlobalVolumeProfile;
-    [SerializeField] private float repeatInputInterval = .25f;
+    [SerializeField] private float repeatInputInterval = .15f;
+    [SerializeField] private float repeatInputIntervalInitial = .45f;
     [SerializeField] private Color darkModeButtonDisableColor;
     private Color lightModeButtonDisableColor;
     private SudokuManager _sudokuManager;
@@ -49,20 +50,25 @@ public class InputManager : MonoBehaviour {
         }
         _sudokuManager.CreateNewPuzzle(_size, _difficulty, _seed);
     }
-    
+
+    private float doRampUp;
     private void Update() {
         if (Input.GetKey(KeyCode.Z) && Time.time > _undoInterval) {
-            _undoInterval = Time.time + repeatInputInterval;
+            _undoInterval = Time.time + Mathf.Lerp(
+                repeatInputIntervalInitial,
+                repeatInputInterval, doRampUp += .2f);
             Command.Processor.Undo();
         }
 
         if (Input.GetKey(KeyCode.Y) && Time.time > _redoInterval) {
-            _redoInterval = Time.time + repeatInputInterval;
+            _redoInterval = Time.time + Mathf.Lerp(
+                repeatInputIntervalInitial,
+                repeatInputInterval, doRampUp += .2f);
             Command.Processor.Redo();
         }
         
-        if (Input.GetKeyUp(KeyCode.Z)) _undoInterval = 0f;
-        if (Input.GetKeyUp(KeyCode.Y)) _redoInterval = 0f;
+        if (Input.GetKeyUp(KeyCode.Z)) _undoInterval = doRampUp = 0f;
+        if (Input.GetKeyUp(KeyCode.Y)) _redoInterval = doRampUp = 0f;
     }
 
     public void Solve() => _sudokuManager.Solve();

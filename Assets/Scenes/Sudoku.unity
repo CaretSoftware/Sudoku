@@ -3551,7 +3551,8 @@ MonoBehaviour:
   postProcessVolume: {fileID: 790324313}
   darkGlobalVolumeProfile: {fileID: 11400000, guid: cc4692e7a2ed46b4b888b80d3dc1aa24, type: 2}
   lightGlobalVolumeProfile: {fileID: 11400000, guid: acdf6375cf9b75b449fcb920b6028399, type: 2}
-  repeatInputInterval: 0.25
+  repeatInputInterval: 0.15
+  repeatInputIntervalInitial: 0.45
   darkModeButtonDisableColor: {r: 0.9339623, g: 0.9339623, b: 0.9339623, a: 0.5019608}
 --- !u!1 &1429147030
 GameObject:
