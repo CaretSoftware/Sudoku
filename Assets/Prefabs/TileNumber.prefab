@@ -93,7 +93,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 8530414498177900239}
   background: {fileID: 8530414497733947871}
-  validColor: {r: 0, g: 0.84313726, b: 0.043819427, a: 0.19607843}
   interactableColor: {r: 0, g: 0, b: 0, a: 0.12941177}
 --- !u!114 &8530414497733947868
 MonoBehaviour:
@@ -108,7 +107,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}

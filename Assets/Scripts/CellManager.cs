@@ -4,7 +4,6 @@ using TMPro;
 public class CellManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private GameObject numberTilePrefab;
-    [SerializeField] private GameObject blankTilePrefab;
     [SerializeField] private Transform numberTileParent;
 
     private static int _size;
@@ -19,66 +18,52 @@ public class CellManager : MonoBehaviour {
 
     private void FillCell() {
         int number = Sudoku.Number(Index);
-
-        if (number == Sudoku.Blank)
-            SpawnTiles();
-        else
-            text.text = number.ToString();
+        bool cleared = number != Sudoku.Blank;
+        SpawnTiles(cleared);
+        text.text = cleared ? number.ToString() : string.Empty;
     }
 
-    private void SpawnTiles() {
+    private void SpawnTiles(bool cleared) {
         for (int i = 1; i <= _size; i++) {
             NumberTile numberTile = 
                 Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
             numberTile.MyCellManager = this;
             numberTile.Number = i;
             _numberTiles[i - 1] = numberTile;
-            numberTile.Valid(Sudoku.Valid(Index, i));
+            numberTile.Valid = Sudoku.Valid(Index, i);
+            numberTile.Cleared = cleared;
         }
     }
 
     public void ClickedTile(int number) {
-        Command.Processor.ExecuteCommand(
-                new Command.FillNumber(this, Sudoku.Number(Index), number));
-        //SetNumber(number);
-        //SudokuManager.SetNumber(Index, number);
-        //ClearAllTiles();
+        SudokuManager.FillNumber(Index, number);
     }
 
     public void SetNumber(int number) {
-        if (number == Sudoku.Blank) {
-            SetNumber(string.Empty);
-            ShowAllTiles();
-        } else {
+        if (number != Sudoku.Blank) {
             SetNumber(number.ToString());
-            ClearAllTiles();
-        }
-    }
-
-    private void ShowAllTiles() {
-        for (int tile = 0; tile < _numberTiles.Length; tile++) {
-            
+            ClearAllTiles(clear: true);
+        } else {
+            SetNumber(string.Empty);
+            ClearAllTiles(clear: false);
         }
     }
 
     private void SetNumber(string s) => text.text = s;
 
-    private void ClearAllTiles() {
+    private void ClearAllTiles(bool clear) {
         for (int number = 1; number <= _size; number++)
-            ClearTile(number, assigned: true);
+            _numberTiles[number - 1].Cleared = clear;
     }
 
-    public void ClearTiles(bool valid, params int[] numbers) {
+    public void ClearTiles(Command.FillNumber.AddTileChange addTileChange, params int[] numbers) {
         for (int i = 0; i < numbers.Length; i++)
-            ClearTile(numbers[i], valid);
+            ClearTile(addTileChange, numbers[i]);
     }
     
-    private void ClearTile(int number, bool valid = true, bool assigned = false) {
-        if (number - 1 < 0 || number - 1 >= _numberTiles.Length)
-            Debug.Log($"num: {number}");
+    private void ClearTile(Command.FillNumber.AddTileChange addTileChange, int number) {
         NumberTile tile = _numberTiles[number - 1];
-        if (tile != null && !tile.Cleared)
-            tile.Clear(clear: true, valid, assigned);
+        tile.Clear(addTileChange);
     }
 
     public static void ResetCells(int size) {

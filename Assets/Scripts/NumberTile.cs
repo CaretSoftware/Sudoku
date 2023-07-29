@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class NumberTile : MonoBehaviour {
-    public delegate void ShowValid(bool show);
-    public static ShowValid ShowValidDelegate;
+    public delegate void HideInvalid(bool shouldHide);
+    public static HideInvalid HideInvalidTile;
 
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private Image background;
@@ -19,47 +19,53 @@ public class NumberTile : MonoBehaviour {
             text.text = _numberString;
         }
     }
+    
     public CellManager MyCellManager { get; set; }
-    public bool Cleared { get; private set; }
+    public bool Cleared {
+        get => _cleared;
+        set {
+            _cleared = value;
+            ShowTile();
+        } 
+    }
+    public bool Valid {
+        get => _valid;
+        set {
+            _valid = value; 
+            ShowTile();
+        }
+    }
 
-    private bool _interactable = true;
+    private static bool _shouldHide;
     private bool _valid = true;
-    private bool _show;
+    private bool _cleared;
     private string _numberString;
     private int _number;
 
-    private void Awake() => ShowValidDelegate += Show;
+    private void Awake() => HideInvalidTile += Hide;
 
-    private void OnDestroy() => ShowValidDelegate -= Show;
+    private void OnDestroy() => HideInvalidTile -= Hide;
 
+    public void Clear(Command.FillNumber.AddTileChange addTileChange) {
+        if (!Cleared)
+            addTileChange?.Invoke(new Command.TileChange(this, prevValid: Valid, currValid: false));
+    }
+    
     public void Click() {
-        if (_interactable)
-            MyCellManager.ClickedTile(Number);
-    }
-
-    private void Show(bool hide) {
-        _show = hide;
-        if (Cleared) 
+        if (Blank())
             return;
-        background.color = hide && !_valid ?  Color.clear : interactableColor;
-        text.alpha = hide && !_valid ? 0f : 1f;
+        MyCellManager.ClickedTile(Number);
     }
 
-    public void Clear(bool clear, bool valid = true, bool assigned = false) {
-        Cleared = assigned;
-        _interactable = !assigned;
-        _valid = valid;
-        if (assigned) {
-            background.color = clear ? Color.clear : interactableColor;
-            text.alpha = clear ? 0f : 1f;
-            return;
-        }
-        if (_show) 
-            Show(true);
+    private void Hide(bool shouldHide) {
+        _shouldHide = shouldHide;
+        ShowTile();
     }
 
-    public void Valid(bool valid) => _valid = valid; // TODO Show(_show); ?
+    private void ShowTile() {
+        background.color = Blank() ?  Color.clear : interactableColor;
+        text.alpha =  Blank() ? 0f : 1f;
+    }
+
+    private bool Blank() => Cleared || (_shouldHide && !Valid);
 }
-
-// TODO pass down Command.FillNumbers delegate '_addToTileChangesList' to the tiles that are checked for invalidness.
-// TODO reduce the number of bools. keep Invalid. Set all tiles under filled cell as Invalid in command

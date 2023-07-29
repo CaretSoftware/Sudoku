@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
 
-public enum Difficulty {  Impossible = 64, Improbable = 60, VeryHard = 55, Hard = 50, Medium = 45, Easy = 40 }
+public enum Difficulty {  Hard = 64, Medium = 45, Easy = 40 }
 
 public class Sudoku {
     public const int Blank = 0;
@@ -20,7 +20,7 @@ public class Sudoku {
         0, 0, 0, 2, 0, 0, 0, 0, 0,
         0, 0, 7, 0, 4, 0, 2, 0, 3,
     };
-    
+
     public static void NewPuzzle(int seed, int size, Difficulty difficulty) {
         _size = size;
         Random random = seed == 0 ? new Random() : new Random(seed);
@@ -96,7 +96,7 @@ public class Sudoku {
         }
 
         if (Unique(copy)) {
-            blanks -= blanked;
+            blanks += blanked;
             board = copy;
         } else
             tries++;
@@ -133,8 +133,16 @@ public class Sudoku {
 
         numSolvedBoards++;                              // Update number of solved boards.
     }
+
+    public static bool Solution(int[] board) {
+        board = (int[])board.Clone();
+        if (Solve(board) == null)
+            return false;
+        Board = board;
+        return true;
+    }
     
-    public static int[] Solve(int[] board) {
+    private static int[] Solve(int[] board) {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
             if (board[index] == Blank) {
@@ -142,6 +150,7 @@ public class Sudoku {
                     if (Valid(board, num, index)) {
                         board[index] = num;             // Try num.
                         if (Solve(board) != null) {     // Recursive call.
+                            Board = board;
                             return board;               // Success! Managed to fill entire board!
                         }
                         board[index] = 0;               // Reset num before backtracking.
@@ -155,7 +164,8 @@ public class Sudoku {
     }
 
     private static bool Valid(int[] board, int num, int index) {
-        return !NumberInRow(board, num, index) &&
+        return board[index] == Blank &&
+               !NumberInRow(board, num, index) &&
                !NumberInCol(board, num, index) &&
                !NumberInBox(board, num, index);
     }
