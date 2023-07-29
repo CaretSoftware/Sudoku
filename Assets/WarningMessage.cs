@@ -34,6 +34,7 @@ public class WarningMessage : MonoBehaviour {
     }
 
     public void Close() {
+        Debug.Log("CLOSE PRESSED");
         Window(openWindow: false);
     }
 

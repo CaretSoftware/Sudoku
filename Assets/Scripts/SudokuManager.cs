@@ -56,7 +56,8 @@ public class SudokuManager : MonoBehaviour {
     }
 
     public void Solve() {
-        if (!Sudoku.Solution(Sudoku.Board)) {
+        
+        if (InvalidNumbers(Sudoku.Board) || !Sudoku.Solution(Sudoku.Board)) {
             const string message = "NO VALID SOLUTION";
             WarningMessage.warningMessage?.Invoke(message);
             return;
@@ -67,6 +68,19 @@ public class SudokuManager : MonoBehaviour {
             SetNumber(index, number: Sudoku.Board[index]);
         }
         Command.Processor.ClearUndo();
+    }
+
+    private static bool InvalidNumbers(int[] board) {
+        for (int index = 0; index < board.Length; index++) {
+            int num = board[index];
+            if (num == Sudoku.Blank) continue;
+            board[index] = Sudoku.Blank;
+            if (!Sudoku.Valid(board, num, index)) {
+                return true;
+            }
+            board[index] = num;
+        }
+        return false;
     }
 
     public static void SetNumber(int index, int number) {

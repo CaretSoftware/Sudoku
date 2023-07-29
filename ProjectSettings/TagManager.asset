@@ -41,3 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Sudoku
+    uniqueID: 2755911463
+    locked: 0
+  - name: UI
+    uniqueID: 1514010689
+    locked: 0

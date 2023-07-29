@@ -7,7 +7,7 @@ public enum Difficulty {  Hard = 64, Medium = 45, Easy = 40 }
 
 public class Sudoku {
     public const int Blank = 0;
-    private static int _size {
+    private static int Size {
         get => _sizeBackingField;
         set {
             _sizeBackingField = value;
@@ -30,7 +30,7 @@ public class Sudoku {
     };
 
     public static void NewPuzzle(int seed, int size, Difficulty difficulty) {
-        _size = size;
+        Size = size;
         Random random = seed == 0 ? new Random() : new Random(seed);
         Board = NewBoard(new int[size * size], size, random);
         Board = SetDifficulty(Board, size, difficulty, random);
@@ -55,7 +55,7 @@ public class Sudoku {
 
         for (int col = 0; col < size - 1; col++)
             board[col + 1] = colOrder[col];
-        debug = 0;
+
         int[] filledBoard = Solve(board);
         if (filledBoard == null) // duplicate values in first block, recursively try new board
             return NewBoard(new int[size * size], size, random);
@@ -64,9 +64,9 @@ public class Sudoku {
     }
 
     private static void PrintBoard(int[] board) {
-        string s = String.Format("==={0, -3}x{0, 3}===\n", _size);
+        string s = String.Format("==={0, -3}x{0, 3}===\n", Size);
         for (int i = 0; i < board.Length; i++) {
-            if (i % _size == 0)
+            if (i % Size == 0)
                 s += "\n";
             s += $"{board[i]} ";
         }
@@ -135,7 +135,7 @@ public class Sudoku {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
             if (board[index] == Blank) {
-                for (int num = 1; num <= _size; num++) {
+                for (int num = 1; num <= Size; num++) {
                     if (Valid(board, num, index)) {
                         board[index] = num;             // Try num.
                         Unique(board, ref numSolvedBoards);// Recursive call.
@@ -159,19 +159,12 @@ public class Sudoku {
         return true;
     }
 
-    private static int debug;
-    
     private static int[] Solve(int[] board) {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
             if (board[index] == Blank) {
-                for (int num = 1; num <= _size; num++) {
+                for (int num = 1; num <= Size; num++) {
                     if (Valid(board, num, index)) {
-                        debug++;
-                        if (debug > 10000000) {
-                            WarningMessage.warningMessage?.Invoke("1.000.000 ITERATIONS\nNO SUDOKU");
-                            return null;
-                        }
                         board[index] = num;             // Try num.
                         if (Solve(board) != null) {     // Recursive call.
                             Board = board;
@@ -187,7 +180,7 @@ public class Sudoku {
         return board;                                   // Success! All cells filled.
     }
 
-    private static bool Valid(int[] board, int num, int index) {
+    public static bool Valid(int[] board, int num, int index) {
         return board[index] == Blank &&
                !NumberInRow(board, num, index) &&
                !NumberInCol(board, num, index) &&
@@ -196,7 +189,7 @@ public class Sudoku {
 
     private static bool NumberInRow(int[] board, int num, int index) {
         int rowStartIndex = RowStartIndex(index);
-        for (int i = 0; i < _size; i++)
+        for (int i = 0; i < Size; i++)
             if (board[rowStartIndex + i] == num)
                 return true;
         
@@ -205,7 +198,7 @@ public class Sudoku {
 
     private static bool NumberInCol(int[] board, int num, int index) {
         int colStartIndex = ColStartIndex(index);
-        for (int i = 0; i < _size * _size; i += _size)
+        for (int i = 0; i < Size * Size; i += Size)
             if (board[colStartIndex + i] == num)
                 return true;
 
@@ -216,22 +209,22 @@ public class Sudoku {
         int boxStart = BoxStartIndex(index);
         for (int r = 0; r < _blockWidth; r++)
             for (int c = 0; c < _blockWidth; c++)
-                if (board[boxStart + r * _size + c] == num)
+                if (board[boxStart + r * Size + c] == num)
                     return true;
         
         return false;
     }
 
-    private static int Row(int index) => index / _size;
+    private static int Row(int index) => index / Size;
     
-    private static int Col(int index) => index % _size;
+    private static int Col(int index) => index % Size;
     
-    public static int RowStartIndex(int index) => Row(index) * _size;
+    public static int RowStartIndex(int index) => Row(index) * Size;
     
     public static int ColStartIndex(int index) => Col(index);
 
     public static int BoxStartIndex(int index) => 
-        Row(index) / _blockWidth * _size * _blockWidth + Col(index) / _blockWidth * _blockWidth;
+        Row(index) / _blockWidth * Size * _blockWidth + Col(index) / _blockWidth * _blockWidth;
 
     public static bool Valid(int index, int num) => Valid(Board, num, index);
 
