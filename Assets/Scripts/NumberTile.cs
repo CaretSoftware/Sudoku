@@ -11,6 +11,8 @@ public class NumberTile : MonoBehaviour {
     [SerializeField] private Image background;
     [SerializeField] private Color interactableColor;
     [SerializeField] private RectTransform textRectTransform;
+    
+    public TileManager MyTileManager { get; set; }
     public int Number {
         get => _number;
         set {
@@ -19,8 +21,6 @@ public class NumberTile : MonoBehaviour {
             text.text = _numberString;
         }
     }
-    
-    public TileManager MyTileManager { get; set; }
     public bool Cleared {
         get => _cleared;
         set {
@@ -36,15 +36,13 @@ public class NumberTile : MonoBehaviour {
         }
     }
 
-    private static bool _shouldHide;
     private bool _valid = true;
+    private static bool _shouldHide;
     private bool _cleared;
     private string _numberString;
     private int _number;
 
     private void Awake() => HideInvalidTile += Hide;
-
-    public void SetSize(Vector2 size) => textRectTransform.sizeDelta = size;
 
     private void OnDestroy() => HideInvalidTile -= Hide;
 
@@ -70,4 +68,6 @@ public class NumberTile : MonoBehaviour {
     }
 
     private bool Blank() => Cleared || (_shouldHide && !Valid);
+
+    public void SetSize(Vector2 size) => textRectTransform.sizeDelta = size;
 }

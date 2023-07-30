@@ -11,8 +11,7 @@ public class Sudoku {
         {64,  45,  40 }, //  9x9
         {166, 144, 122}, // 16x16
     };
-    // Good seeds:
-    private static readonly int[] GoodSeeds = new int[] { 3, 5, 6, 8, }; // 10 tried
+    private static readonly int[] GoodSeeds = new int[] { 3, 5, 6, 8, };
     private static readonly Dictionary<int, int> SizeIndex = new Dictionary<int, int> { {4,  0}, {9,  1}, {16, 2} };
     public const int Blank = 0;
     public static int Size {
@@ -42,11 +41,11 @@ public class Sudoku {
         Size = size;
         _randomSeed = seed == 0;
         Random random = _randomSeed ? new Random() : new Random(seed);
-        if (size == 16) random = new Random( GoodSeeds[random.Next(GoodSeeds.Length)] );
-        Board = NewBoard(new int[size * size], size, random);
+        if (Size == 16) random = new Random( GoodSeeds[random.Next(GoodSeeds.Length)] );
+        Board = NewBoard(new int[Size * Size], Size, random);
         Random tempRand = new Random();
         while (Size == 16 && tempRand.Next() % 5 == 0) { random.Next(); }
-        Board = SetDifficulty(Board, size, difficulty, random);
+        Board = SetDifficulty(Board, Size, difficulty, random);
     }
     
     private static int[] NewBoard(int[] board, int size, Random random) {
@@ -161,15 +160,7 @@ public class Sudoku {
 
         numSolvedBoards++;                              // Update number of solved boards.
     }
-
-    public static bool Solution(int[] board) {
-        board = (int[])board.Clone();
-        if (Solve(board) == null)
-            return false;
-        Board = board;
-        return true;
-    }
-
+    
     private static int[] Solve(int[] board) {
         int length = board.Length;
         for (int index = 0; index < length; index++) {
@@ -184,7 +175,6 @@ public class Sudoku {
                         board[index] = 0;               // Reset num before backtracking.
                     }
                 }
-
                 return null;                            // No valid numbers possible, earlier numbers incorrect.
             }
         }
@@ -192,6 +182,14 @@ public class Sudoku {
         return board;                                   // Success! All cells filled.
     }
 
+    public static bool Solution(int[] board) {
+        board = (int[])board.Clone();
+        if (Solve(board) == null)
+            return false;
+        Board = board;
+        return true;
+    }
+    
     public static bool Valid(int[] board, int num, int index) {
         return board[index] == Blank &&
                !NumberInRow(board, num, index) &&
@@ -244,4 +242,3 @@ public class Sudoku {
 
     public static void SetNumber(int index, int number) => Board[index] = number;
 }
-

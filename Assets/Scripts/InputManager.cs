@@ -27,7 +27,7 @@ public class InputManager : MonoBehaviour {
     private Color _lightModeButtonDisableColor;
     private Difficulty _difficulty;
     private int _seed;
-    private int _size = 9;
+    private int _selectedSize = Sudoku.Size;
     private float _undoInterval;
     private float _redoInterval;
     private float _rampUp;
@@ -53,7 +53,7 @@ public class InputManager : MonoBehaviour {
                 _difficulty = Difficulty.Hard;
                 break;
         }
-        _sudokuManager.CreateNewPuzzle(_size, _difficulty, _seed);
+        _sudokuManager.CreateNewPuzzle(_selectedSize, _difficulty, _seed);
     }
 
     private void Update() {
@@ -80,7 +80,7 @@ public class InputManager : MonoBehaviour {
     public void Undo() => Command.Processor.Undo();
 
     public void Size() {
-        _size = BoardSizeIndex[sizeDropDown.value];
+        _selectedSize = BoardSizeIndex[sizeDropDown.value];
     }
  
     public void Seed() {

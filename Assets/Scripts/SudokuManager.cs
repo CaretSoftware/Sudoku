@@ -3,18 +3,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SudokuManager : MonoBehaviour {
-    private static int _size = 9;
+    //private static int _size = 9;
     private static List<TileManager> _tileManagers = new List<TileManager>();
     [SerializeField] private GameObject cellPrefab;
-    [SerializeField] private RectTransform sudokuRectTransform;
     [SerializeField] private GridLayoutGroup gridLayout;
     [SerializeField] private float sudokuPanelDimension = 628.1552f;
     [SerializeField] private BlockHandler blockHandler;
     
-    private void Awake() => CreateNewPuzzle(_size);
+    private void Awake() => CreateNewPuzzle(Sudoku.Size);
 
     public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
-        _size = size;
         blockHandler.NewBlocks(size);
         DestroyOldPuzzle();
         Sudoku.NewPuzzle(seed, size, difficulty);
@@ -46,10 +44,10 @@ public class SudokuManager : MonoBehaviour {
         int colStart = Sudoku.ColStartIndex(index);
         int boxStart = Sudoku.BoxStartIndex(index);
 
-        for (int row = rowStart, rowEnd = rowStart + _size; row < rowEnd; row++)
+        for (int row = rowStart, rowEnd = rowStart + Sudoku.Size; row < rowEnd; row++)
             _tileManagers[row].ClearTiles(addTileChange, numbers: nums);
         
-        for (int col = colStart, colEnd = _size * _size + colStart; col < colEnd; col += _size)
+        for (int col = colStart, colEnd = Sudoku.Size * Sudoku.Size + colStart; col < colEnd; col += Sudoku.Size)
             _tileManagers[col].ClearTiles(addTileChange, numbers: nums);
         
         for (int r = 0; r < Sudoku.BlockWidth; r++)

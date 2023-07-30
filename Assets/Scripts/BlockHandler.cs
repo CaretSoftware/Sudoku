@@ -16,7 +16,7 @@ public class BlockHandler : MonoBehaviour {
     private int _lastSize;
     
     private void Awake() {
-        NewBlocks(9);
+        NewBlocks(Sudoku.Size);
         InputManager.DarkModeDelegate += DarkModeColor;
     }
 
