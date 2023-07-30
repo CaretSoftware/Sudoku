@@ -5,6 +5,11 @@ using TMPro;
 using UnityEngine.Rendering;
 
 public class InputManager : MonoBehaviour {
+    public delegate void DarkMode(bool dark);
+    public static DarkMode DarkModeDelegate;
+
+    private static readonly int[] BoardSizeIndex = new int[] { 4, 9, 16 };
+    
     [SerializeField] private TMP_Dropdown sudokuDropDown;
     [SerializeField] private TMP_Dropdown sizeDropDown;
     [SerializeField] private TMP_InputField seedInputField;
@@ -17,8 +22,9 @@ public class InputManager : MonoBehaviour {
     [SerializeField] private float repeatInputInterval = .15f;
     [SerializeField] private float repeatInputIntervalInitial = .45f;
     [SerializeField] private Color darkModeButtonDisableColor;
-    private Color lightModeButtonDisableColor;
+    
     private SudokuManager _sudokuManager;
+    private Color _lightModeButtonDisableColor;
     private Difficulty _difficulty;
     private int _seed;
     private int _size = 9;
@@ -29,7 +35,7 @@ public class InputManager : MonoBehaviour {
 
     private void Awake() {
         Command.Processor.undoEmptyDelegate += UndoButton;
-        lightModeButtonDisableColor = undoButton.colors.disabledColor;
+        _lightModeButtonDisableColor = undoButton.colors.disabledColor;
         _sudokuManager = FindObjectOfType<SudokuManager>();
     }
 
@@ -74,14 +80,7 @@ public class InputManager : MonoBehaviour {
     public void Undo() => Command.Processor.Undo();
 
     public void Size() {
-        switch (sizeDropDown.value) {
-            case 0:
-                _size = 9;
-                break;
-            case 1:
-                _size = 16;
-                break;
-        }
+        _size = BoardSizeIndex[sizeDropDown.value];
     }
  
     public void Seed() {
@@ -103,11 +102,12 @@ public class InputManager : MonoBehaviour {
 
     public void NightMode() {
         _darkMode = !_darkMode;
+        DarkModeDelegate?.Invoke(_darkMode);
 
         postProcessVolume.profile = _darkMode ? darkGlobalVolumeProfile : lightGlobalVolumeProfile;
         darkModeButtonText.text = _darkMode ? "LIGHT MODE" : "DARK MODE";
         ColorBlock colorBlock = undoButton.colors;
-        colorBlock.disabledColor = _darkMode ? darkModeButtonDisableColor : lightModeButtonDisableColor;
+        colorBlock.disabledColor = _darkMode ? darkModeButtonDisableColor : _lightModeButtonDisableColor;
         undoButton.colors = colorBlock;
     }
     

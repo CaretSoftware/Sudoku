@@ -14,13 +14,14 @@ public class WarningMessage : MonoBehaviour {
     [SerializeField] private RectTransform messageBoxRectTransform;
     [SerializeField] private TextMeshProUGUI warningText;
     [SerializeField] private float secondsUntilClose = 2f;
-
+    
     private enum WindowState {
         Closed,
         Opening,
         Open,
         Closing,
     }
+    private float _tileToClose;
     private WindowState _windowState = WindowState.Closed;
     private Coroutine _popupCoroutine;
     
@@ -33,10 +34,7 @@ public class WarningMessage : MonoBehaviour {
         Window(openWindow: true);
     }
 
-    public void Close() {
-        Debug.Log("CLOSE PRESSED");
-        Window(openWindow: false);
-    }
+    public void Close() => Window(openWindow: false);
 
     private void Window(bool openWindow) {
         switch (_windowState) {
@@ -59,14 +57,11 @@ public class WarningMessage : MonoBehaviour {
     }
 
     private IEnumerator CloseDelay(float secondsUntilClose) {
-        float t = 0f;
-        do {
-            t += Time.deltaTime;
-            if (_windowState is WindowState.Closing or WindowState.Closing)
-                yield break;
-            yield return null;
-        } while (t < secondsUntilClose);
-
+        _tileToClose = Time.time + secondsUntilClose;
+        yield return new WaitUntil(() => Time.time > _tileToClose || 
+                                         _windowState is WindowState.Closing or WindowState.Closing);
+        if (_windowState is WindowState.Closing or WindowState.Closing)
+            yield break;
         Window(openWindow: false);
     }
 

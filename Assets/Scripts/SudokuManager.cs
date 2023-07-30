@@ -9,11 +9,13 @@ public class SudokuManager : MonoBehaviour {
     [SerializeField] private RectTransform sudokuRectTransform;
     [SerializeField] private GridLayoutGroup gridLayout;
     [SerializeField] private float sudokuPanelDimension = 628.1552f;
+    [SerializeField] private BlockHandler blockHandler;
     
     private void Awake() => CreateNewPuzzle(_size);
 
     public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
         _size = size;
+        blockHandler.NewBlocks(size);
         DestroyOldPuzzle();
         Sudoku.NewPuzzle(seed, size, difficulty);
         InstantiateCells(size);
@@ -50,13 +52,12 @@ public class SudokuManager : MonoBehaviour {
         for (int col = colStart, colEnd = _size * _size + colStart; col < colEnd; col += _size)
             _tileManagers[col].ClearTiles(addTileChange, numbers: nums);
         
-        for (int r = 0; r < 3; r++)
-            for (int c = 0; c < 3; c++)
-                _tileManagers[boxStart + r * _size + c].ClearTiles(addTileChange, numbers: nums);
+        for (int r = 0; r < Sudoku.BlockWidth; r++)
+            for (int c = 0; c < Sudoku.BlockWidth; c++)
+                _tileManagers[boxStart + r * Sudoku.Size + c].ClearTiles(addTileChange, numbers: nums);
     }
 
     public void Solve() {
-        
         if (InvalidNumbers(Sudoku.Board) || !Sudoku.Solution(Sudoku.Board)) {
             const string message = "NO VALID SOLUTION";
             WarningMessage.warningMessage?.Invoke(message);
@@ -75,10 +76,10 @@ public class SudokuManager : MonoBehaviour {
             int num = board[index];
             if (num == Sudoku.Blank) continue;
             board[index] = Sudoku.Blank;
-            if (!Sudoku.Valid(board, num, index)) {
-                return true;
-            }
+            bool invalid = !Sudoku.Valid(board, num, index);
             board[index] = num;
+            if (invalid)
+                return true;
         }
         return false;
     }
