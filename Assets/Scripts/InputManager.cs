@@ -53,6 +53,11 @@ public class InputManager : MonoBehaviour {
                 _difficulty = Difficulty.Hard;
                 break;
         }
+
+        if (_selectedSize == 16 && _difficulty != Difficulty.Easy) {
+            WarningMessagePopup.WarningMessage?.Invoke("TIME LIMIT RESTRICTION\n(ONLY EASY DIFFICULTY ALLOWED FOR 16x16)");
+            return;
+        }
         _sudokuManager.CreateNewPuzzle(_selectedSize, _difficulty, _seed);
     }
 

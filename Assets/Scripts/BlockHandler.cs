@@ -45,7 +45,8 @@ public class BlockHandler : MonoBehaviour {
                 1f - _lightColor.g, 
                 1f - _lightColor.b,  
                 46f/255f);
-
+        gameObject.SetActive(false);
+        
         bool FilledSquare(int x, int y) => (x + y) % 2 == 0;
     }
 
@@ -62,4 +63,6 @@ public class BlockHandler : MonoBehaviour {
         _instantiatedFilledBlocks.Clear();
         _instantiatedBlocks.Clear();
     }
+
+    public void ShowBlocks() => gameObject.SetActive(true);
 }

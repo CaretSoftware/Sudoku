@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -12,38 +13,52 @@ public class TileManager : MonoBehaviour {
     [SerializeField] private Outline outline;
     [SerializeField] private float defaultOutlineDistance = 5f;
 
-    private static int _size;
     private static int _staticIndex;
-    private readonly NumberTile[] _numberTiles = new NumberTile[_size];
+    private int _numberOfActiveTiles;
+    private readonly List<NumberTile> _numberTiles = new List<NumberTile>();
     private int _index;
 
     private void Awake() => _index = _staticIndex++;
 
-    private void Start() => FillCell();
+    private void OnEnable() => FillCell();
 
     private void FillCell() {
         int number = Sudoku.Number(_index);
         bool cleared = number != Sudoku.Blank;
-        SpawnTiles(cleared);
+        CreateTiles(cleared);
         text.text = cleared ? number.ToString() : string.Empty;
     }
 
-    private void SpawnTiles(bool cleared) {
-        float numberTileDimension = sudokuPanelDimension / _size / Mathf.Sqrt(_size);
+    public void CreateTiles(bool cleared) {
+        float numberTileDimension = sudokuPanelDimension / Sudoku.Size / Mathf.Sqrt(Sudoku.Size);
         Vector2 numberTileSize = new Vector2(numberTileDimension, numberTileDimension);
         gridLayout.cellSize = numberTileSize;
-        float outlineWidth = defaultOutlineDistance * (9f / _size);
+        float outlineWidth = defaultOutlineDistance * (9f / Sudoku.Size);
         outline.effectDistance = new Vector2(outlineWidth, outlineWidth);
         
-        for (int i = 1; i <= _size; i++) {
-            NumberTile numberTile = 
-                Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
-            numberTile.MyTileManager = this;
-            numberTile.Number = i;
+        for (int i = 1; i <= Sudoku.Size; i++) {
+            NumberTile numberTile;
+            if (_numberOfActiveTiles >= _numberTiles.Count) {
+                numberTile = 
+                    Instantiate(numberTilePrefab, numberTileParent.transform).GetComponent<NumberTile>();
+                _numberTiles.Add(numberTile);
+                numberTile.MyTileManager = this;
+                numberTile.Number = i;
+            } else {
+                numberTile = _numberTiles[_numberOfActiveTiles];
+            }
             numberTile.Valid = Sudoku.Valid(_index, i);
             numberTile.Cleared = cleared;
-            _numberTiles[i - 1] = numberTile;
+            numberTile.gameObject.SetActive(true);
             numberTile.SetSize(numberTileSize);
+            _numberOfActiveTiles++;
+        }
+    }
+
+    public void RemoveAllTiles() {
+        while (_numberOfActiveTiles > 0) {
+            _numberTiles[_numberOfActiveTiles - 1].gameObject.SetActive(false);
+            _numberOfActiveTiles--;
         }
     }
 
@@ -64,7 +79,7 @@ public class TileManager : MonoBehaviour {
     private void SetNumber(string s) => text.text = s;
 
     private void ClearAllTiles(bool clear) {
-        for (int number = 1; number <= _size; number++)
+        for (int number = 1; number <= Sudoku.Size; number++)
             _numberTiles[number - 1].Cleared = clear;
     }
 
@@ -79,9 +94,4 @@ public class TileManager : MonoBehaviour {
     }
     
     public void SetSize(Vector2 size) => textRectTransform.sizeDelta = size;
-
-    public static void ResetCells(int size) {
-        _staticIndex = 0;
-        _size = size;
-    }
 }

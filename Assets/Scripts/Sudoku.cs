@@ -6,13 +6,13 @@ using Random = System.Random;
 public enum Difficulty {  Hard, Medium, Easy }
 
 public class Sudoku {
-    private static readonly int[,] SizeDifficultyDesiredBlanks = new int[,] {
-        {12,  12,  12 }, //  4x4
-        {64,  45,  40 }, //  9x9
-        {166, 144, 122}, // 16x16
+    private static readonly int[] Good16x16Seeds = new int[] { 3, 5, 6, 8, 16, 18, 33, };
+    private static readonly Dictionary<int, int> IndexFromSize = new Dictionary<int, int> { {4,  0}, {9,  1}, {16, 2} };
+    private static readonly Dictionary<Difficulty, int[]> DesiredBlanksDifficultySize = new Dictionary<Difficulty, int[]> {
+        {Difficulty.Easy,   new int[] {12, 40,  122}}, 
+        {Difficulty.Medium, new int[] {12, 45,  144}}, 
+        {Difficulty.Hard,   new int[] {12, 64, 166}}, 
     };
-    private static readonly int[] GoodSeeds = new int[] { 3, 5, 6, 8, };
-    private static readonly Dictionary<int, int> SizeIndex = new Dictionary<int, int> { {4,  0}, {9,  1}, {16, 2} };
     public const int Blank = 0;
     public static int Size {
         get => _sizeBackingField;
@@ -37,41 +37,43 @@ public class Sudoku {
         0, 0, 7, 0, 4, 0, 2, 0, 3,
     };
 
+    public void NewPuzzle() {
+        
+    }
+    
     public static void NewPuzzle(int seed, int size, Difficulty difficulty) {
         Size = size;
         _randomSeed = seed == 0;
         Random random = _randomSeed ? new Random() : new Random(seed);
-        if (Size == 16) random = new Random( GoodSeeds[random.Next(GoodSeeds.Length)] );
-        Board = NewBoard(new int[Size * Size], Size, random);
-        Random tempRand = new Random();
-        while (Size == 16 && tempRand.Next() % 5 == 0) { random.Next(); }
+        
+        if (Size == 16) random = new Random( Good16x16Seeds[random.Next(Good16x16Seeds.Length)] );
+        Board = NewBoard(Size, random);
+        Random variation16x16Rand = new Random();
+        while (Size == 16 && !_randomSeed && variation16x16Rand.Next() % 31 != 0) random.Next();
         Board = SetDifficulty(Board, Size, difficulty, random);
+        SudokuManager.SudokuFinished?.Invoke();
     }
-    
-    private static int[] NewBoard(int[] board, int size, Random random) {
-        int blockDimension = Mathf.RoundToInt(Mathf.Sqrt(size));
-        List<int> rowNumbers = new List<int>(size);
-        for (int num = 1; num <= size; num++)
-            rowNumbers.Add(num);
-        
-        rowNumbers.Shuffle(random);
-        
-        List<int> colOrder = new List<int>();
-        for (int num = 1; num <= size; num++)
-            colOrder.Add(num);
-        
-        colOrder.Shuffle(random);
 
-        for (int row = blockDimension * size, num = blockDimension; row < size * size; row += size)
-            board[row] = rowNumbers[num++];
+    private static int[] NewBoard(int size, Random random) {
+        int[] board;
+        do {
+            board = new int[size * size];
+            int blockDimension = Mathf.RoundToInt(Mathf.Sqrt(size));
+            List<int> rowNumbers = new List<int>(size);
+            for (int num = 1; num <= size; num++) rowNumbers.Add(num);
 
-        for (int col = blockDimension; col < size; col++)
-            board[col] = colOrder[col];
+            rowNumbers.Shuffle(random);
 
-        int[] filledBoard = Solve(board);
-        if (filledBoard == null) // recursively try new board when others didnt solve
-            return NewBoard(new int[size * size], size, random);
+            List<int> colOrder = new List<int>();
+            for (int num = 1; num <= size; num++) colOrder.Add(num);
 
+            colOrder.Shuffle(random);
+
+            for (int row = blockDimension * size, num = blockDimension; row < size * size; row += size)
+                board[row] = rowNumbers[num++];
+
+            for (int col = blockDimension; col < size; col++) board[col] = colOrder[col];
+        } while (Solve(board) == null); // Try new board when others didnt solve
         return board;
     }
 
@@ -86,8 +88,8 @@ public class Sudoku {
     }
 
     private static int[] SetDifficulty(int[] board, int size, Difficulty difficulty, Random random) {
-        int desiredBlanks = SizeDifficultyDesiredBlanks[SizeIndex[size], (int)difficulty];
-        _symmetry = _symmetry.RandomEnumValue<Symmetry>(random);
+        int desiredBlanks = DesiredBlanksDifficultySize[difficulty][IndexFromSize[size]];
+        _symmetry = _symmetry.RandomEnumValue(random);
         board = BlankCells(board, size, _symmetry, desiredBlanks, random);
         return board;
     }

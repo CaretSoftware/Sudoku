@@ -1,11 +1,10 @@
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 
-public class WarningMessage : MonoBehaviour {
+public class WarningMessagePopup : MonoBehaviour {
     public delegate void WarningMessageDelegate(string message);
-    public static WarningMessageDelegate warningMessage;
+    public static WarningMessageDelegate WarningMessage;
 
     [SerializeField, Range(0f, 1f)] private float popUpDuration = .5f;
     [SerializeField, Range(0f, 1f)] private float closeDuration = .25f;
@@ -25,9 +24,9 @@ public class WarningMessage : MonoBehaviour {
     private WindowState _windowState = WindowState.Closed;
     private Coroutine _popupCoroutine;
     
-    private void Awake() => warningMessage += Warning;
+    private void Awake() => WarningMessage += Warning;
 
-    private void OnDestroy() => warningMessage -= Warning;
+    private void OnDestroy() => WarningMessage -= Warning;
     
     private void Warning(string message) {
         warningText.text = message;
