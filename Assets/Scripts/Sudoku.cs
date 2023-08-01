@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
@@ -6,25 +5,14 @@ using Random = System.Random;
 public enum Difficulty {  Hard, Medium, Easy }
 
 public class Sudoku {
-    private static readonly int[] Good16x16Seeds = new int[] { 3, 5, 6, 8, 16, 18, 33, };
-    private static readonly Dictionary<int, int> IndexFromSize = new Dictionary<int, int> { {4,  0}, {9,  1}, {16, 2} };
-    private static readonly Dictionary<Difficulty, int[]> DesiredBlanksDifficultySize = new Dictionary<Difficulty, int[]> {
-        {Difficulty.Easy,   new int[] {12, 40,  122}}, 
-        {Difficulty.Medium, new int[] {12, 45,  144}}, 
-        {Difficulty.Hard,   new int[] {12, 64, 166}}, 
-    };
     public const int Blank = 0;
-    public static int Size {
-        get => _sizeBackingField;
-        private set {
-            _sizeBackingField = value;
-            BlockWidth = Mathf.RoundToInt(Mathf.Sqrt(value));
-        }
-    }
-    private static int _sizeBackingField = 9;
-    public static int BlockWidth { get; private set; } = 3;
-    private static Symmetry _symmetry = Symmetry.Vertical;
-    private static bool _randomSeed;
+    private static readonly int[] Good16x16Seeds = new int[] { 3, 5, 6, 8, 16, 18, 33, };
+    private static readonly Dictionary<int, int> IndexFromSize = new() { {4,  0}, {9,  1}, {16, 2} };
+    private static readonly Dictionary<Difficulty, int[]> DesiredBlanksDifficultySize = new() {
+        {Difficulty.Easy,   new int[] {12, 40,  122}}, 
+        {Difficulty.Medium, new int[] {14, 45,  144}}, 
+        {Difficulty.Hard,   new int[] {16, 64, 166}}, 
+    };
     public static int[] Board { get; private set; } = {
         7, 0, 2, 0, 5, 0, 6, 0, 0,
         0, 0, 0, 0, 0, 3, 0, 0, 0,
@@ -36,11 +24,19 @@ public class Sudoku {
         0, 0, 0, 2, 0, 0, 0, 0, 0,
         0, 0, 7, 0, 4, 0, 2, 0, 3,
     };
-
-    public void NewPuzzle() {
-        
+    public static int Size {
+        get => _sizeBackingField;
+        private set {
+            _sizeBackingField = value;
+            BlockWidth = Mathf.RoundToInt(Mathf.Sqrt(value));
+        }
     }
-    
+    public static int BlockWidth { get; private set; } = 3;
+    private enum Symmetry { Vertical, Horizontal, Diagonal }
+    private static Symmetry _symmetry = Symmetry.Vertical;
+    private static int _sizeBackingField = 9;
+    private static bool _randomSeed;
+
     public static void NewPuzzle(int seed, int size, Difficulty difficulty) {
         Size = size;
         _randomSeed = seed == 0;
@@ -48,8 +44,8 @@ public class Sudoku {
         
         if (Size == 16) random = new Random( Good16x16Seeds[random.Next(Good16x16Seeds.Length)] );
         Board = NewBoard(Size, random);
-        Random variation16x16Rand = new Random();
-        while (Size == 16 && !_randomSeed && variation16x16Rand.Next() % 31 != 0) random.Next();
+        Random variation16x16Random = new Random();
+        while (Size == 16 && _randomSeed && variation16x16Random.Next() % 31 != 0) random.Next();
         Board = SetDifficulty(Board, Size, difficulty, random);
         SudokuManager.SudokuFinished?.Invoke();
     }
@@ -77,16 +73,6 @@ public class Sudoku {
         return board;
     }
 
-    private static void PrintBoard(int[] board) {
-        string s = String.Format("==={0, -3}x{0, 3}===\n", Size);
-        for (int i = 0; i < board.Length; i++) {
-            if (i % Size == 0)
-                s += "\n";
-            s += $"{board[i]} ";
-        }
-        Debug.Log(s);
-    }
-
     private static int[] SetDifficulty(int[] board, int size, Difficulty difficulty, Random random) {
         int desiredBlanks = DesiredBlanksDifficultySize[difficulty][IndexFromSize[size]];
         _symmetry = _symmetry.RandomEnumValue(random);
@@ -95,44 +81,44 @@ public class Sudoku {
     }
 
     private static int[] BlankCells(int[] board, int size, Symmetry symmetry, int desiredBlanks, Random random, int blanks = 0, int tries = 0) {
-        int[] copy = (int[])board.Clone();
-        int length = copy.Length;
-        int blanked = 0;
-        int index;
-
         do {
-            index = random.Next(length);
-        } while (copy[index] == Blank);
+            int[] copy = (int[])board.Clone();
+            int length = copy.Length;
+            int blanked = 0;
+            int index;
 
-        copy[index] = Blank;
-        blanked++;
-        
-        switch (symmetry) {
-            case Symmetry.Vertical:
-                index = RowStartIndex((size - 1 - Row(index)) * size) + Col(index);
-                break;
-            case Symmetry.Horizontal:
-                index = RowStartIndex(index) + size - 1 - Col(index);
-                break;
-            case Symmetry.Diagonal:
-                index = length - 1 - index;
-                break;
-        }
+            do {
+                index = random.Next(length);
+            } while (copy[index] == Blank);
 
-        if (copy[index] != Blank) {
-            blanked++;
             copy[index] = Blank;
-        }
+            blanked++;
 
-        if (Unique(copy)) {
-            blanks += blanked;
-            board = copy;
-        } else
-            tries++;
+            switch (symmetry) {
+                case Symmetry.Vertical:
+                    index = RowStartIndex((size - 1 - Row(index)) * size) + Col(index);
+                    break;
+                case Symmetry.Horizontal:
+                    index = RowStartIndex(index) + size - 1 - Col(index);
+                    break;
+                case Symmetry.Diagonal:
+                    index = length - 1 - index;
+                    break;
+            }
 
-        if (blanks < desiredBlanks && tries < 100)
-            return BlankCells(board, size, symmetry, desiredBlanks, random, blanks, tries);
-        
+            if (copy[index] != Blank) {
+                blanked++;
+                copy[index] = Blank;
+            }
+
+            if (Unique(copy)) {
+                blanks += blanked;
+                board = copy;
+            } else {
+                tries++;
+            }
+
+        } while (blanks < desiredBlanks && tries < 100);
         return board;
     }
 
@@ -162,10 +148,10 @@ public class Sudoku {
 
         numSolvedBoards++;                              // Update number of solved boards.
     }
-    
-    private static int[] Solve(int[] board) {
-        int length = board.Length;
-        for (int index = 0; index < length; index++) {
+
+    private static int _numberOfSolves;
+    private static int[] Solve(int[] board) {           // Returns first solved board
+        for (int index = 0; index < board.Length; index++) {
             if (board[index] == Blank) {
                 for (int num = 1; num <= Size; num++) {
                     if (Valid(board, num, index)) {
@@ -180,7 +166,7 @@ public class Sudoku {
                 return null;                            // No valid numbers possible, earlier numbers incorrect.
             }
         }
-
+        
         return board;                                   // Success! All cells filled.
     }
 

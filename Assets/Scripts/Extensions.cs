@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public enum Symmetry { Vertical, Horizontal, Diagonal }
-    
 public static class Extensions {
     public static void Shuffle<T>(this IList<T> list, Random random) {  
         int n = list.Count;

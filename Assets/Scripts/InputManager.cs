@@ -34,12 +34,12 @@ public class InputManager : MonoBehaviour {
     private bool _darkMode;
 
     private void Awake() {
-        Command.Processor.undoEmptyDelegate += UndoButton;
+        Command.Processor.UndoEmptyDelegate += UndoButton;
         _lightModeButtonDisableColor = undoButton.colors.disabledColor;
         _sudokuManager = FindObjectOfType<SudokuManager>();
     }
 
-    private void OnDestroy() => Command.Processor.undoEmptyDelegate -= UndoButton;
+    private void OnDestroy() => Command.Processor.UndoEmptyDelegate -= UndoButton;
 
     public void NewSudoku() {
         switch (sudokuDropDown.value) {

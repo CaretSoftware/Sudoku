@@ -25,11 +25,11 @@ public class TileManager : MonoBehaviour {
     private void FillCell() {
         int number = Sudoku.Number(_index);
         bool cleared = number != Sudoku.Blank;
-        CreateTiles(cleared);
+        InitializeTiles(cleared);
         text.text = cleared ? number.ToString() : string.Empty;
     }
 
-    public void CreateTiles(bool cleared) {
+    public void InitializeTiles(bool cleared) {
         float numberTileDimension = sudokuPanelDimension / Sudoku.Size / Mathf.Sqrt(Sudoku.Size);
         Vector2 numberTileSize = new Vector2(numberTileDimension, numberTileDimension);
         gridLayout.cellSize = numberTileSize;

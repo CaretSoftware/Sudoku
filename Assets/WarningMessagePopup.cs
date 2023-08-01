@@ -25,8 +25,6 @@ public class WarningMessagePopup : MonoBehaviour {
     private Coroutine _popupCoroutine;
     
     private void Awake() => WarningMessage += Warning;
-
-    private void OnDestroy() => WarningMessage -= Warning;
     
     private void Warning(string message) {
         warningText.text = message;
@@ -102,4 +100,6 @@ public class WarningMessagePopup : MonoBehaviour {
         messageBoxRectTransform.localScale = Vector3.zero;
         _windowState = WindowState.Closed;
     }
+
+    private void OnDestroy() => WarningMessage -= Warning;
 }

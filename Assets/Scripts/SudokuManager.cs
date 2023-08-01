@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,38 +10,18 @@ public class SudokuManager : MonoBehaviour {
     public static SudokuGenerationFinished SudokuFinished;
     private static readonly List<TileManager> TileManagers = new List<TileManager>();
     private static int _numberOfActiveCells;
-    private bool _sudokuGenerated;
+    private static int _numberOfTilesSet = 0;
     private Difficulty _difficulty;
+    private bool _sudokuGenerated;
     private int _size;
     private int _seed;
 
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private GridLayoutGroup gridLayout;
     [SerializeField] private float sudokuPanelDimension = 628.1552f;
-    [SerializeField] private BlockHandler blockHandler;
+    [SerializeField] private BlockColorHandler blockColorHandler;
 
-    private void Awake() {
-        SudokuFinished += SudokuGenerated;
-    }
-
-    private void CreateCells(int size) {
-        Vector2 gridCellSize = new Vector2( sudokuPanelDimension / size, sudokuPanelDimension / size);
-        gridLayout.cellSize = gridCellSize;
-        
-        while (_numberOfActiveCells < size * size) {
-            TileManager tileManager;
-            if (_numberOfActiveCells >= TileManagers.Count) {
-                tileManager = Instantiate(cellPrefab, this.transform).GetComponent<TileManager>();
-                TileManagers.Add(tileManager);
-            } else {
-                tileManager = TileManagers[_numberOfActiveCells];
-            }
-
-            tileManager.SetSize(gridCellSize);
-            tileManager.gameObject.SetActive(true);
-            _numberOfActiveCells++;
-        }
-    }
+    private void Awake() => SudokuFinished += SudokuGenerated;
 
     private void RemoveAllCells() {
         while (_numberOfActiveCells > 0) {
@@ -53,9 +34,8 @@ public class SudokuManager : MonoBehaviour {
     private void Start() => CreateNewPuzzle(Sudoku.Size);
     
     public async void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
-        blockHandler.NewBlocks(size);
-        RemoveOldPuzzle();
-        //await Sudoku.NewPuzzle(seed, size, difficulty);
+        blockColorHandler.InitializeBlocks(size);
+        RemoveLastPuzzle();
         _size = size;
         _seed = seed; 
         _difficulty = difficulty;
@@ -63,9 +43,14 @@ public class SudokuManager : MonoBehaviour {
         Thread thread = new Thread(CreateNewPuzzleThread);
         thread.Start();
         await WaitForSudokuGeneration();
-        blockHandler.ShowBlocks();
-        //InstantiateCells(_threadedSize);
-        CreateCells(_size);
+        blockColorHandler.ShowBlocks();
+        InitializeCells(_size);
+        _numberOfTilesSet = Sudoku.Board.Count(num => num != 0);
+    }
+
+    private void RemoveLastPuzzle() {
+        Command.Processor.ClearUndo();
+        RemoveAllCells();
     }
     
     private void CreateNewPuzzleThread() => Sudoku.NewPuzzle(_seed, _size, _difficulty);
@@ -76,12 +61,26 @@ public class SudokuManager : MonoBehaviour {
         }
     }
 
-    private void SudokuGenerated() => _sudokuGenerated = true;
+    private void InitializeCells(int size) {
+        Vector2 gridCellSize = new Vector2( sudokuPanelDimension / size, sudokuPanelDimension / size);
+        gridLayout.cellSize = gridCellSize;
+        
+        while (_numberOfActiveCells < size * size) {
+            TileManager tileManager;
+            if (_numberOfActiveCells >= TileManagers.Count) {   // Dynamically Instantiate more tiles
+                tileManager = Instantiate(cellPrefab, this.transform).GetComponent<TileManager>();
+                TileManagers.Add(tileManager);
+            } else {                                            // Get tileManager from "pool"
+                tileManager = TileManagers[_numberOfActiveCells];
+            }
 
-    private void RemoveOldPuzzle() {
-        Command.Processor.ClearUndo();
-        RemoveAllCells();
+            tileManager.SetSize(gridCellSize);
+            tileManager.gameObject.SetActive(true);
+            _numberOfActiveCells++;
+        }
     }
+
+    private void SudokuGenerated() => _sudokuGenerated = true;
 
     private static void FindInvalidTiles(int index, Command.FillNumber.AddTileChange addTileChange = null, 
             params int[] nums) {
@@ -130,6 +129,13 @@ public class SudokuManager : MonoBehaviour {
     public static void SetNumber(int index, int number) {
         Sudoku.SetNumber(index, number);
         TileManagers[index].SetNumber(number);
+        _numberOfTilesSet += number != 0 ? 1 : -1;
+        if (_numberOfTilesSet >= Sudoku.Size * Sudoku.Size) {
+            if (!InvalidNumbers(Sudoku.Board) && Sudoku.Solution(Sudoku.Board))
+                WinText.UpdateEndGameText?.Invoke("CORRECT");
+            else
+                WinText.UpdateEndGameText?.Invoke("INCORRECT\nUNDO");
+        }
     }
 
     public static void FillNumber(int index, int number) {
