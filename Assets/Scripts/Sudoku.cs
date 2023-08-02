@@ -25,16 +25,16 @@ public class Sudoku {
         0, 0, 7, 0, 4, 0, 2, 0, 3,
     };
     public static int Size {
-        get => _sizeBackingField;
+        get => _size;
         private set {
-            _sizeBackingField = value;
+            _size = value;
             BlockWidth = Mathf.RoundToInt(Mathf.Sqrt(value));
         }
     }
     public static int BlockWidth { get; private set; } = 3;
+    private static int _size = 9;
     private enum Symmetry { Vertical, Horizontal, Diagonal }
     private static Symmetry _symmetry = Symmetry.Vertical;
-    private static int _sizeBackingField = 9;
     private static bool _randomSeed;
 
     public static void NewPuzzle(int seed, int size, Difficulty difficulty) {
@@ -149,7 +149,6 @@ public class Sudoku {
         numSolvedBoards++;                              // Update number of solved boards.
     }
 
-    private static int _numberOfSolves;
     private static int[] Solve(int[] board) {           // Returns first solved board
         for (int index = 0; index < board.Length; index++) {
             if (board[index] == Blank) {

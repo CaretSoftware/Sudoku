@@ -1,38 +1,39 @@
-using System.Collections.Generic;
+#if UNITY_STANDALONE_WIN
 using System.Threading;
-using System.Linq;
 using System.Threading.Tasks;
+#endif
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SudokuManager : MonoBehaviour {
+    [SerializeField] private GameObject cellPrefab;
+    [SerializeField] private GridLayoutGroup gridLayout;
+    [SerializeField] private float sudokuPanelDimension = 628.1552f;
+    [SerializeField] private BlockColorHandler blockColorHandler;
+    
     public delegate void SudokuGenerationFinished();
     public static SudokuGenerationFinished SudokuFinished;
     private static readonly List<TileManager> TileManagers = new List<TileManager>();
     private static int _numberOfActiveCells;
     private static int _numberOfTilesSet = 0;
     private Difficulty _difficulty;
-    private bool _sudokuGenerated;
     private int _size;
     private int _seed;
-
-    [SerializeField] private GameObject cellPrefab;
-    [SerializeField] private GridLayoutGroup gridLayout;
-    [SerializeField] private float sudokuPanelDimension = 628.1552f;
-    [SerializeField] private BlockColorHandler blockColorHandler;
+#if UNITY_STANDALONE_WIN
+    private bool _sudokuGenerated;
 
     private void Awake() => SudokuFinished += SudokuGenerated;
 
-    private void RemoveAllCells() {
-        while (_numberOfActiveCells > 0) {
-            TileManagers[_numberOfActiveCells - 1].gameObject.SetActive(false);
-            TileManagers[_numberOfActiveCells - 1].RemoveAllTiles();
-            _numberOfActiveCells--;
-        }
-    }
+    private void SudokuGenerated() => _sudokuGenerated = true;
+
+    private void OnDestroy() => SudokuFinished -= SudokuGenerated;
+#endif
     
     private void Start() => CreateNewPuzzle(Sudoku.Size);
-    
+
+#if UNITY_STANDALONE_WIN
     public async void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
         blockColorHandler.InitializeBlocks(size);
         RemoveLastPuzzle();
@@ -40,7 +41,7 @@ public class SudokuManager : MonoBehaviour {
         _seed = seed; 
         _difficulty = difficulty;
         _sudokuGenerated = false;
-        Thread thread = new Thread(CreateNewPuzzleThread);
+        Thread thread = new Thread(CreateNewPuzzle);
         thread.Start();
         await WaitForSudokuGeneration();
         blockColorHandler.ShowBlocks();
@@ -48,18 +49,40 @@ public class SudokuManager : MonoBehaviour {
         _numberOfTilesSet = Sudoku.Board.Count(num => num != 0);
     }
 
-    private void RemoveLastPuzzle() {
-        Command.Processor.ClearUndo();
-        RemoveAllCells();
-    }
-    
-    private void CreateNewPuzzleThread() => Sudoku.NewPuzzle(_seed, _size, _difficulty);
-
     private async Task WaitForSudokuGeneration() {
         while (!_sudokuGenerated) {
             await Task.Yield();
         }
     }
+    
+#elif UNITY_WEBGL
+    public void CreateNewPuzzle(int size, Difficulty difficulty = Difficulty.Easy, int seed = 0) {
+        blockColorHandler.InitializeBlocks(size);
+        RemoveLastPuzzle();
+        _size = size;
+        _seed = seed; 
+        _difficulty = difficulty;
+        CreateNewPuzzle();
+        blockColorHandler.ShowBlocks();
+        InitializeCells(_size);
+        _numberOfTilesSet = Sudoku.Board.Count(num => num != 0);
+    }
+#endif
+
+    private void RemoveLastPuzzle() {
+        Command.Processor.ClearUndo();
+        RemoveAllCells();
+    }
+
+    private static void RemoveAllCells() {
+        while (_numberOfActiveCells > 0) {
+            TileManagers[_numberOfActiveCells - 1].gameObject.SetActive(false);
+            TileManagers[_numberOfActiveCells - 1].RemoveAllTiles();
+            _numberOfActiveCells--;
+        }
+    }
+    
+    private void CreateNewPuzzle() => Sudoku.NewPuzzle(_seed, _size, _difficulty);
 
     private void InitializeCells(int size) {
         Vector2 gridCellSize = new Vector2( sudokuPanelDimension / size, sudokuPanelDimension / size);
@@ -79,8 +102,6 @@ public class SudokuManager : MonoBehaviour {
             _numberOfActiveCells++;
         }
     }
-
-    private void SudokuGenerated() => _sudokuGenerated = true;
 
     private static void FindInvalidTiles(int index, Command.FillNumber.AddTileChange addTileChange = null, 
             params int[] nums) {
@@ -134,7 +155,7 @@ public class SudokuManager : MonoBehaviour {
             if (!InvalidNumbers(Sudoku.Board) && Sudoku.Solution(Sudoku.Board))
                 WinText.UpdateEndGameText?.Invoke("CORRECT");
             else
-                WinText.UpdateEndGameText?.Invoke("INCORRECT\nUNDO");
+                WinText.UpdateEndGameText?.Invoke("INCORRECT\nUNDO [Z]");
         }
     }
 
@@ -143,6 +164,4 @@ public class SudokuManager : MonoBehaviour {
         FindInvalidTiles(index, fillNumberCommand.AddTileChangeDelegate(), number);
         Command.Processor.ExecuteCommand(fillNumberCommand);
     }
-
-    private void OnDestroy() => SudokuFinished -= SudokuGenerated;
 }

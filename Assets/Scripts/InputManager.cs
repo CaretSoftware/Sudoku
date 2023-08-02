@@ -2,30 +2,29 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.Rendering;
 
 public class InputManager : MonoBehaviour {
     public delegate void DarkMode(bool dark);
     public static DarkMode DarkModeDelegate;
-
+    
     private static readonly int[] BoardSizeIndex = new int[] { 4, 9, 16 };
     
     [SerializeField] private TMP_Dropdown sudokuDropDown;
     [SerializeField] private TMP_Dropdown sizeDropDown;
     [SerializeField] private TMP_InputField seedInputField;
+    [SerializeField] private TextMeshProUGUI darkModeButtonText;
     [SerializeField] private Button undoButton;
     [SerializeField] private Toggle hideInvalidNumbersToggle;
-    [SerializeField] private TextMeshProUGUI darkModeButtonText;
-    [SerializeField] private Volume postProcessVolume;
-    [SerializeField] private VolumeProfile darkGlobalVolumeProfile;
-    [SerializeField] private VolumeProfile lightGlobalVolumeProfile;
     [SerializeField] private float repeatInputInterval = .15f;
     [SerializeField] private float repeatInputIntervalInitial = .45f;
     [SerializeField] private Color darkModeButtonDisableColor;
-    
+    [SerializeField] private FullScreenPassRendererFeature invertColorsFeature; 
+    [SerializeField] private FullScreenPassRendererFeature fullScreenPassRendererFeature; 
+
     private SudokuManager _sudokuManager;
-    private Color _lightModeButtonDisableColor;
+    private Material _fullScreenPassRendererFeatureMaterial;
     private Difficulty _difficulty;
+    private Color _lightModeButtonDisableColor;
     private int _seed;
     private int _selectedSize = Sudoku.Size;
     private float _undoInterval;
@@ -37,9 +36,8 @@ public class InputManager : MonoBehaviour {
         Command.Processor.UndoEmptyDelegate += UndoButton;
         _lightModeButtonDisableColor = undoButton.colors.disabledColor;
         _sudokuManager = FindObjectOfType<SudokuManager>();
+        InvertColorsRenderFeature(false);
     }
-
-    private void OnDestroy() => Command.Processor.UndoEmptyDelegate -= UndoButton;
 
     public void NewSudoku() {
         switch (sudokuDropDown.value) {
@@ -55,7 +53,7 @@ public class InputManager : MonoBehaviour {
         }
 
         if (_selectedSize == 16 && _difficulty != Difficulty.Easy) {
-            WarningMessagePopup.WarningMessage?.Invoke("TIME LIMIT RESTRICTION\n(ONLY EASY DIFFICULTY ALLOWED FOR 16x16)");
+            WarningMessagePopup.WarningMessage?.Invoke("TIME RESTRICTION\n(ONLY EASY DIFFICULTY ALLOWED FOR 16x16)");
             return;
         }
         _sudokuManager.CreateNewPuzzle(_selectedSize, _difficulty, _seed);
@@ -107,14 +105,23 @@ public class InputManager : MonoBehaviour {
 
     public void NightMode() {
         _darkMode = !_darkMode;
+        InvertColorsRenderFeature(_darkMode);
         DarkModeDelegate?.Invoke(_darkMode);
-
-        postProcessVolume.profile = _darkMode ? darkGlobalVolumeProfile : lightGlobalVolumeProfile;
         darkModeButtonText.text = _darkMode ? "LIGHT MODE" : "DARK MODE";
         ColorBlock colorBlock = undoButton.colors;
         colorBlock.disabledColor = _darkMode ? darkModeButtonDisableColor : _lightModeButtonDisableColor;
         undoButton.colors = colorBlock;
     }
+
+    private void InvertColorsRenderFeature(bool dark) {
+        invertColorsFeature.SetActive(dark);
+        fullScreenPassRendererFeature.SetActive(!dark);
+    }
     
     private void UndoButton(bool empty) => undoButton.interactable = !empty;
+
+    private void OnDestroy() {
+        Command.Processor.UndoEmptyDelegate -= UndoButton;
+        InvertColorsRenderFeature(false);
+    }
 }

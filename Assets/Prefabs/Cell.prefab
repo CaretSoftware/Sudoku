@@ -35,7 +35,7 @@ RectTransform:
   - {fileID: 6802760909899421301}
   - {fileID: 6802760910788764115}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -78,7 +78,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 6802760910788764112}
-  numberTilePrefab: {fileID: 8530414497733947874, guid: 8197ff9296e09f54da3cebe045429c34, type: 3}
+  numberTilePrefab: {fileID: 7329242051333071824, guid: 8197ff9296e09f54da3cebe045429c34, type: 3}
   numberTileParent: {fileID: 6802760909899421301}
   gridLayout: {fileID: 6802760909899421258}
   sudokuPanelDimension: 628.1552
@@ -197,6 +197,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 1
   m_TargetDisplay: 0
