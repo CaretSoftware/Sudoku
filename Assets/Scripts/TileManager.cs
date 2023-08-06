@@ -29,7 +29,7 @@ public class TileManager : MonoBehaviour {
         text.text = cleared ? number.ToString() : string.Empty;
     }
 
-    public void InitializeTiles(bool cleared) {
+    private void InitializeTiles(bool cleared) {
         float numberTileDimension = sudokuPanelDimension / Sudoku.Size / Mathf.Sqrt(Sudoku.Size);
         Vector2 numberTileSize = new Vector2(numberTileDimension, numberTileDimension);
         gridLayout.cellSize = numberTileSize;

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using System.Threading;
 #endif
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 

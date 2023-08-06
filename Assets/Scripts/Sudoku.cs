@@ -24,6 +24,7 @@ public class Sudoku {
         0, 0, 0, 2, 0, 0, 0, 0, 0,
         0, 0, 7, 0, 4, 0, 2, 0, 3,
     };
+
     public static int Size {
         get => _size;
         private set {

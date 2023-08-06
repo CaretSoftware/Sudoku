@@ -1,6 +1,6 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
+using TMPro;
 
 public class WarningMessagePopup : MonoBehaviour {
     public delegate void WarningMessageDelegate(string message);

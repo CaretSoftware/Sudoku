@@ -17,7 +17,7 @@ public class SudokuManager : MonoBehaviour {
     public static SudokuGenerationFinished SudokuFinished;
     private static readonly List<TileManager> TileManagers = new List<TileManager>();
     private static int _numberOfActiveCells;
-    private static int _numberOfTilesSet = 0;
+    private static int _numberOfTilesSet;
     private Difficulty _difficulty;
     private int _size;
     private int _seed;
@@ -120,7 +120,7 @@ public class SudokuManager : MonoBehaviour {
                 TileManagers[boxStart + r * Sudoku.Size + c].ClearTiles(addTileChange, numbers: nums);
     }
 
-    public void Solve() {
+    public static void Solve() {
         if (InvalidNumbers(Sudoku.Board) || !Sudoku.Solution(Sudoku.Board)) {
             const string message = "NO VALID SOLUTION";
             WarningMessagePopup.WarningMessage?.Invoke(message);
