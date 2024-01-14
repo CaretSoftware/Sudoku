@@ -23,7 +23,7 @@ Utilising array math made the code much more compact and, in my opinion, much mo
 
 Use this repository to learn about recursion, the command pattern, or the basics of multithreading.  
 
-[bergsten.itch.io/sudoku]([https://bergsten.itch.io](https://bergsten.itch.io/sudoku))
+[bergsten.itch.io/sudoku](https://bergsten.itch.io/sudoku)  
 (WebGL version has no multithreading)
 
 ![image](https://github.com/CaretSoftware/Sudoku/assets/69549081/5f71fe84-3fe1-422d-8c49-6e8d5f503909)
