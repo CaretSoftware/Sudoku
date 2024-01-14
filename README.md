@@ -5,7 +5,7 @@ Sudoku game/generator
 
 ## Table of Contents
 
-- [Character Controller](#Sudoku)
+- [Sudoku](#Sudoku)
   - [Table of Contents](#table-of-contents)
   - [About the Project](#about-the-project)
   - [Prerequisites](#prerequisites)
